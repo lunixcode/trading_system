@@ -1,0 +1,322 @@
+[
+    {
+        "date": "2024-02-29T23:00:32+00:00",
+        "title": "UPDATE 3-Nasdaq notches first record high close since 2021",
+        "content": "(Adds detail throughout on recovery of indexes, rallies in Nvidia and other stocks)\n\nNEW YORK, Feb 29 (Reuters) -\n\nThe Nasdaq reached a record high close on Thursday for the first time in over two years, its latest rally propelled by investor optimism about artificial intelligence, particularly Nvidia and other heavyweight tech stocks.\n\nThe Nasdaq advanced 144.18 points, or 0.90%, to 16,091.92, beating its Nov. 19, 2021 record high close of 16,057.44.\n\nInvestor euphoria around AI has made Nvidia Wall Street's most widely traded company, replacing Tesla.\n\n\"The anticipation of an artificial intelligence boom has really provided support for these stocks even at extended valuations. It's led to the best performing ones really exceeding what most people thought was possible just a year ago,\" said Rick Meckler, partner at Cherry Lane Investments, a family investment office in New Vernon, New Jersey.\n\n\"For it to continue I think you'd need move past the idea of artificial intelligence as a revolution and begin to see revenue growth directly attributable to it.\"\n\nThe tech-heavy index began its latest rally after its closing low in December 2022, which was down more than 30% from its November 2021 record high as investors worried about inflation and rising interest rates dumped growth stocks with high valuations.\n\nThe Nasdaq is the last of Wall Street's three major stock indexes to reach a record high close. After selloffs through most of 2022, the S&P 500 has now hit a string of record highs since late January, and the Dow Jones Industrial Average returned to record highs in late 2023.\n\nMuch of the Nasdaq's recovery in recent months has been fueled by optimism the Federal Reserve will soon begin cutting interest rates along with the AI-related tech euphoria.\n\nNvidia has surged 60% so far this year and this month eclipsed Amazon and Alphabet to become Wall Street's\n\nthird most valuable\n\ncompany, with a market capitalization of $1.94 trillion.\n\nStory continues\n\nMicrosoft, another major AI winner, has gained 10% in valuation to $3.03 trillion in 2024, replacing Apple as the world's most valuable company.\n\nNvidia rose 1.9% on Thursday after jumping last week following a forecast of a roughly three-fold surge in quarterly revenue.\n\nThe Nasdaq and S&P 500 are both up about 7% in 2024.\n\n(Reporting by Caroline Valetkevitch in New York and Noel Randewich in Oakland, Calif.; Editing by Chris Reese and David Gregorio)",
+        "link": "https://finance.yahoo.com/news/2-nasdaq-notches-first-record-230032934.html",
+        "symbols": [
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.994,
+            "neg": 0.027,
+            "neu": 0.826,
+            "pos": 0.148
+        }
+    },
+    {
+        "date": "2024-02-29T22:41:00+00:00",
+        "title": "Dell Stock Soars as Earnings Top Estimates and Demand for AI Servers Surges",
+        "content": "Dell Technologies posted better-than-expected earnings for its latest quarter, as the company continues to see robust demand for AI servers. Dell shares in late trading were 16% higher at $110. The maker of PCs also announced a 20% increase in its quarterly dividend rate.\n\nContinue reading",
+        "link": "https://finance.yahoo.com/m/7f4fb6b1-ccb1-3130-b04e-5d6501db4792/dell-stock-soars-as-earnings.html",
+        "symbols": [
+            "12DA.F",
+            "12DA.STU",
+            "12DA.XETRA",
+            "D1EL34.SA",
+            "DELL.US",
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.66,
+            "neg": 0.03,
+            "neu": 0.83,
+            "pos": 0.14
+        }
+    },
+    {
+        "date": "2024-02-29T21:31:07+00:00",
+        "title": "Nasdaq registers record closing high",
+        "content": "NEW YORK (Reuters) - The Nasdaq posted a record high finish on Thursday, closing above its prior record high of 16,057.44 set on Nov. 21, 2021.\n\nThe index has been boosted by technology stocks linked to artificial intelligence including Nvidia and Microsoft.\n\n(Reporting by Caroline Valetkevitch)",
+        "link": "https://ca.finance.yahoo.com/news/nasdaq-registers-record-closing-high-213107316.html",
+        "symbols": [
+            "0QYP.IL",
+            "MSF.BE",
+            "MSF.DU",
+            "MSF.F",
+            "MSF.HM",
+            "MSF.MU",
+            "MSF.STU",
+            "MSF.XETRA",
+            "MSF0.F",
+            "MSFT.BA",
+            "MSFT.MX",
+            "MSFT.NEO",
+            "MSFT.SN",
+            "MSFT.US",
+            "MSFT34.SA",
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.681,
+            "neg": 0,
+            "neu": 0.882,
+            "pos": 0.118
+        }
+    },
+    {
+        "date": "2024-02-29T21:22:00+00:00",
+        "title": "SoundHound Misses on Earnings, but Growth Accelerates. Is Nvidia a Customer?",
+        "content": "The stock of the AI voice technology company is up 87% for the week, and it remains one of the market’s most actively traded issues.\n\nContinue reading",
+        "link": "https://finance.yahoo.com/m/ab2a93c9-2c40-358e-a43e-d9088fec6b0a/soundhound-misses-on.html",
+        "symbols": [
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.374,
+            "neg": 0,
+            "neu": 0.91,
+            "pos": 0.09
+        }
+    },
+    {
+        "date": "2024-02-29T21:05:01+00:00",
+        "title": "Dell beats fourth-quarter revenue estimates signaling PC market recovery",
+        "content": "Feb 29 (Reuters) - Dell Technologies beat Wall Street estimates for fourth-quarter revenue on Thursday, helped by the artificial intelligence boom and a recovery in the personal computer (PC) market.\n\nThe PC market is showing signs of green shoots following a slowdown in revenue that began in 2022 from the peaks touched during the pandemic, as the boom in work-from-home demand for PCs and electronics faded.\n\nDell is also a beneficiary of rising demand for its AI-servers that are equipped with chip designer Nvidia's graphics processing units (GPUs), which helps in meeting the demands of high-performance computing.\n\n\"Our strong AI-optimized server momentum continues, with orders increasing nearly 40% sequentially and backlog nearly doubling, exiting our fiscal year at $2.9 billion,\" Chief Operating Officer Jeff Clarke said in a statement.\n\nLast week, Lenovo Group reported stronger-than-expected earnings in the third quarter, with revenue returning to growth after five quarters of decline.\n\nThe global PC market returned to 3% growth in the fourth quarter of 2023 and is now poised for a stronger recovery in 2024, data research firm Canalys said in January.\n\nDell posted revenue of $22.32 billion for the quarter ended Feb. 2, slightly ahead of analysts' average estimates of $22.16 billion, according to LSEG data.\n\nRevenue at the infrastructure solutions group, which includes its storage, software and server offerings, fell about 6% to $9.33 billion, while that of the client solutions group - home to PCs - fell nearly 12% to $11.72 billion. (Reporting by Jaspreet Singh in Bengaluru; Editing by Shailesh Kuber)",
+        "link": "https://finance.yahoo.com/news/dell-beats-fourth-quarter-revenue-210501687.html",
+        "symbols": [
+            "12DA.F",
+            "12DA.STU",
+            "12DA.XETRA",
+            "D1EL34.SA",
+            "DELL.US",
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.965,
+            "neg": 0.011,
+            "neu": 0.892,
+            "pos": 0.096
+        }
+    },
+    {
+        "date": "2024-02-29T19:46:00+00:00",
+        "title": "These 3 Companies Posted Record-Breaking Quarters",
+        "content": "Earnings season continues to wind down, with the bulk of notable companies already delivering quarterly results. The cycle has primarily been positive, underpinned by the Technology sector’s strong performance that has uplifted the overall earnings picture.\n\nAnd throughout the period, there have been several companies delivering results that reflected quarterly records, including Apple AAPL, NVIDIA NVDA, and Celsius Holdings CELH.\n\nBelow is a chart illustrating the performance of each over the last year, with the S&P 500 blended in as a benchmark. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nLet’s take a closer look at each.\n\nApple\n\nMarket-favorite Apple posted quarterly sales of nearly $120 billion and record EPS of $2.18, exceeding our consensus expectations by 1.7% and 4.3%, respectively. Sales grew 2% year-over-year, whereas EPS showed 16% growth.\n\nStill, EPS wasn’t the only quarterly record, as Services revenue of $23.1 billion reached its highest mark yet and grew 11% from the same period last year. Services revenue has become a nice growth driver for Apple overall, helping to decrease its reliance on the iPhone.\n\nIt’s worth noting that the reported figure modestly fell short of the Zacks Consensus estimate, snapping a streak of recent surprises. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nShares couldn’t hold positivity post-earnings, with AAPL shares down nearly 7% YTD and underperforming the S&P 500 by a notable margin. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nNVIDIA\n\nNVIDIA’s quarterly release stole the market spotlight, undoubtedly the most highly-awaited release of the period following an unbelievable growth story stemming from the emergence of artificial intelligence (AI).\n\nThe company generated record Q4 revenue of $22.1 billion and posted EPS of $5.16, reflecting remarkable growth rates of 409% and 485%, respectively. Both items exceeded our consensus earnings and revenue expectations, representing beats of 13% and 8%, respectively.\n\nStory continues\n\nThe company’s top line trajectory is visibly bullish, as shown below. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nUnsurprisingly, Data Center results were the real highlight of the release, which include sales of its AI chips. NVIDIA’s Data Center raked in a record $18.4 billion throughout the period, up an astonishing 410% on a year-over-year stack and reflecting the unrelenting demand the company has been enjoying.\n\nThe reported figure blew away our consensus estimate by nearly $1.5 billion, continuing a recent streak of Data Center positivity. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nAnalysts have been revising their earnings expectations higher for the company over the last year, landing the stock into the highly-coveted Zacks Rank #1 (Strong Buy). Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nCelsius Holdings\n\nCelsius just delivered its latest batch of quarterly results, with Q4 revenue of $347 million 95% higher than the year-ago period and reflecting a record. Quarterly earnings totaled $0.17 per share, above our consensus estimate and well above the $0.01 per share mark in the same period last year.\n\nShares have soared following the print, up a sizable 170% just over the last year. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nResults were driven by strength across both International and North American markets, with sales of each growing 97% and 68% year-over-year, respectively. The company continues to win over new customers, also seeing an uptick in consumption occasions.\n\nBottom Line\n\nEarnings season is slowly grinding to a halt, as the majority of notable companies have already delivered quarterly results. The Q4 cycle turned out to be positive, underpinned by the Technology sector’s strong growth.\n\nAnd throughout the period, several companies, including Apple AAPL, NVIDIA NVDA, and Celsius Holdings CELH, have posted quarterly records.\n\nWant the latest recommendations from Zacks Investment Research? Today, you can download 7 Best Stocks for the Next 30 Days. Click to get this free report\n\nApple Inc. (AAPL) : Free Stock Analysis Report\n\nNVIDIA Corporation (NVDA) : Free Stock Analysis Report\n\nCelsius Holdings Inc. (CELH) : Free Stock Analysis Report\n\nTo read this article on Zacks.com click here.\n\nZacks Investment Research",
+        "link": "https://finance.yahoo.com/news/3-companies-posted-record-breaking-194600595.html",
+        "symbols": [
+            "0R2V.IL",
+            "AAPL.BA",
+            "AAPL.MX",
+            "AAPL.NEO",
+            "AAPL.SN",
+            "AAPL.US",
+            "AAPL34.SA",
+            "APC.BE",
+            "APC.DU",
+            "APC.F",
+            "APC.HA",
+            "APC.HM",
+            "APC.MU",
+            "APC.STU",
+            "APC.XETRA",
+            "APC8.F",
+            "CELH.US",
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.998,
+            "neg": 0.002,
+            "neu": 0.848,
+            "pos": 0.15
+        }
+    },
+    {
+        "date": "2024-02-29T19:32:18+00:00",
+        "title": "US STOCKS-Wall St mixed in choppy trade as investors assess inflation data",
+        "content": "*\n\nJanuary PCE in line with expectations\n\n*\n\nSnowflake slumps on downbeat Q1 revenue forecast\n\n*\n\nIndexes: S&P 500 +0.34%, Nasdaq +0.62%, Dow -0.07%\n\n(Updated at 2:12 p.m. ET/1912 GMT)\n\nBy Noel Randewich and Amruta Khandekar\n\nFeb 29 (Reuters) -\n\nThe S&P 500 rose on Thursday, lifted by Nvidia and other technology stocks linked to AI, while investors assessed inflation data and Federal Reserve officials' comments to gauge when the central bank might begin cutting interest rates.\n\nHeavyweight chipmaker Nvidia climbed 1.9%, while smaller rival Advanced Micro Devices surged over 7%. Those and other technology companies have been at the heart of a Wall Street rally in recent months, fueled by optimism about artificial intelligence.\n\nDell Technologies, which sells AI-optimized servers made with Nvidia's high-end processors, rose 1.2% ahead of its report after the bell.\n\nTraders added to bets that the Fed will cut rates in June after a Commerce Department report showed U.S. prices picked up in January in line with expectations amid strong gains in the costs of services, while the annual increase in inflation was the smallest in three years.\n\n\"It's not a dramatic decline, but inflation is moving in the right direction and that gives investors a little bit of cover to feel a little bit confident about stepping into the stock market,\" said Robert Pavlik, senior portfolio manager at Dakota Wealth.\n\nAtlanta Fed President and voting member Raphael Bostic stressed taking data-dependent approach to monetary policy, saying it was going to be a bumpy path to the Fed's 2% inflation target.\n\nChicago Federal Reserve Bank President Austan Goolsbee said on Thursday he believed there was still room for increases in labor supply to bring down inflation further.\n\nReports on consumer and producer prices earlier in February, which signaled sticky inflation, had led investors to push back expectations of rate cuts to June. At the beginning of this year, traders were betting on March as the starting point for the Fed's easing cycle.\n\nStory continues\n\nMeanwhile, initial jobless claims for the week ended Feb. 24 stood at 215,000, greater than expectations of 210,000, economists polled by Reuters said.\n\nThe S&P 500 was up 0.34% at 5,087.08 points.\n\nThe Nasdaq Composite Index rose 0.62% to 16,046.38 points, while the Dow Jones Industrial Average was down 0.07% at 38,923.00 points.\n\nWith February nearly over, all three major Wall Street indexes were on track for their fourth straight monthly advance, with the tech-heavy Nasdaq in the lead, thanks to robust quarterly earnings and optimism around AI.\n\nOf the 11 S&P 500 sector indexes, eight rose, led by real estate, up 1.21%, followed by a 0.82% gain in information technology.\n\nKeeping the Dow in negative territory, Boeing fell 1.8% after a report of a probe by the Department of Justice.\n\nSnowflake slumped nearly 20% after the cloud data analytics company forecast first-quarter product revenue below Wall Street estimates and said CEO Frank Slootman was retiring.\n\nParamount Global climbed about 1% after the media conglomerate posted a surprise profit on streaming gains.\n\nThe U.S. House of Representatives was set to vote on a bill to avert a partial government shutdown.\n\nAdvancing issues outnumbered falling ones within the S&P 500 by a 1.9-to-one ratio.\n\nThe S&P 500 posted 56 new highs and one new low. The Nasdaq recorded 131 new highs and 48 new lows.\n\n(Reporting by Amruta Khandekar and Bansari Mayur Kamdar in Bengaluru, and by Noel Randewich in Oakland, Calif.; Additional reporting by Johann M Cherian; Editing by Saumyadeb Chakrabarty, Shounak Dasgupta, Maju Samuel and Richard Chang)",
+        "link": "https://finance.yahoo.com/news/us-stocks-wall-st-mixed-193218956.html",
+        "symbols": [
+            "91D.F",
+            "COMP.US",
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.991,
+            "neg": 0.036,
+            "neu": 0.863,
+            "pos": 0.1
+        }
+    },
+    {
+        "date": "2024-02-29T19:26:32+00:00",
+        "title": "Don’t Panic! 7 Smart Stocks to Buy if the Markets Take a Tumble.",
+        "content": "While the equities sector roars higher, it’s never a bad idea to consider stocks to buy for a down market. No, I’m not prognosticating an imminent calamity. Rather, I just think it’s smart to think ahead.\n\nEssentially, stocks to buy for a down market is Wall Street’s equivalent of an emergency kit. You do have one of those, don’t you? Because if you don’t, you should get one. Sure, it might seem like a waste of time and money, especially if an emergency doesn’t materialize. But that’s the thing – unexpected calamities have a way of being, you know, unexpected.\n\nSimilarly, I don’t think you’re going to get uber-rich with these stocks to buy for a down market. However, should the red ink start flying, you’re going to sleep easier buying these giants on the dip.\n\nInvestorPlace - Stock Market News, Stock Advice & Trading Tips\n\nJohnson & Johnson (JNJ) A red Johnson & Johnson (JNJ) sign hangs inside in Moscow, Russia.\n\nSource: Alexander Tolstykh / Shutterstock.com\n\nA pharmaceutical giant, Johnson & Johnson (NYSE:JNJ) is now a more streamlined operation, having spun off its consumer health products division. While I have some reservations about the move, in the long run, it may unlock value for stakeholders prior to the spinoff. Looking ahead, though, J&J itself should benefit from rising permanent demand.\n\nAccording to Acumen Research and Consulting, the global pharmaceutical market reached a valuation of $1.5 trillion in 2022. Analysts anticipate that the sector will expand at a compound annual growth rate (CAGR) of 6.4% from 2023 to 2032. At the forecast’s culmination point, the industry should be worth $2.8 trillion.\n\nAnother factor benefiting JNJ as one of the stocks to buy for a down market is the value proposition. Even without a downcycle, shares trade at a modest trailing-year earnings multiple of 13.29X. If the red ink starts flying, JNJ should be more attractive.\n\nAnalysts view the company as a consensus moderate buy with a $177.67 price target, implying 10% upside potential.\n\nCoca-Cola (KO) KO stock PEP stock: a can of Coca-cola and a can of Pepsi on either side of a glass of brown soda and sitting on top of a pile of ice\n\nSource: monticello / Shutterstock\n\nStory continues\n\nA soft-drink giant, Coca-Cola (NYSE:KO) makes for an ideal play for stocks to buy for a down market because of everyday relevance. Recently, a few major enterprises have demanded an ultimatum regarding work from home: either come back to the office or kiss your job goodbye. With this sharp pivot from the pandemic days, demand for caffeinated products should rise.\n\nAt the same time, consumers have struggled with years of high inflation and spiked borrowing costs. People are still opening their wallets but many sectors have indicated concerns about waning capabilities. So, demand for expensive coffeeshops might fade. Cynically, the trade-down effect should benefit KO stock. The underlying product is cheap (and necessary), thus offering a superior alternative.\n\nTo be sure, KO isn’t exactly a sterling deal on paper. Nevertheless, it offers a forward dividend yield of 3.21%, combined with a payout increase going on 63 years. If you’re looking for stocks to buy for a down market, it doesn’t get much more trustworthy than Coca-Cola.\n\nTarget (TGT) tgt stock\n\nSource: Sundry Photography / Shutterstock.com\n\nOrdinarily, I might go with another big-box retailer other than Target (NYSE:TGT) for stocks to buy for a down market. Yeah, I’m talking about Walmart (NYSE:WMT). If the smelly stuff hits the proverbial fan, Walmart seems more capable of withstanding a wider economic hit. Based on the latest consumer demographic data, Walmart shoppers tend to align with realistic income brackets.\n\nOn the other hand, Target tends to align with consumers within higher income levels. Nevertheless, they both provide one-stop shopping experiences that allow them to stay relevant in the age of e-commerce. Further, what I appreciate about TGT stock specifically is that it’s more “technically” undervalued than WMT. The former security is up about 6% on a year-to-date basis while the latter gained over 12%.\n\nAlso, I can’t overlook the better value proposition in terms of passive income. Right now, Target offers a forward dividend yield of 2.91%. On the other hand, WMT is comparatively miserly with a yield of 1.39%. Analysts rate Target a consensus strong buy, which seems reasonable.\n\nCostco (COST) A Costco Wholesale (COST) warehouse in Auburn Hills, Michigan.\n\nSource: ilzesgimene / Shutterstock.com\n\nA similar investment to Target and Walmart, Costco (NASDAQ:COST) should also be on your radar for stocks to buy for a down market. Fundamentally, I appreciate COST stock for its viable consumer demographics. The main takeaway is that shoppers tend to be younger and more upwardly mobile. In other words, Costco’s demo indicates that it starts at a high point and is only rising.\n\nFrom an investment standpoint – especially in a segment that overlaps with the broader discretionary retail space – I don’t think you can ask for much better. Now, here’s the thing with COST stock: I wouldn’t buy it at this juncture. Rather, if the market gives you a sizable dip because of some disastrous economic event, Costco is a name to pick up on the cheap.\n\nSome ideas you simply don’t trust when the red stains emerge. That’s because their questionable business models become even more suspect under sever economic duress. But Costco? The retailer has weathered multiple storms. Further, it enjoys natural insulation because of its educated, higher-wage-earning members.\n\nIBM (IBM) Photo of IBM (IBM) building as seen through the canopy of a tree. IBM logo is in large letters on side of building.\n\nSource: shutterstock.com/LCV\n\nWhen it comes to stocks to buy for a down market, IBM (NYSE:IBM) is an “OG” stock. That’s slang for “original gangster” or “gangsta” if you’re really cool. Basically, Big Blue is an authentic, old-school technology investment. While everybody’s been going gaga over enterprises like Nvidia (NASDAQ:NVDA) for facilitating artificial intelligence, IBM has been doing AI since most of you were born.\n\nAfter years of languishing in the shadows, it appears that the legacy tech juggernaut is finally receiving some dues. It’s not enough. However, I’m sure long-embattled stakeholders will take a 15% pop to start 2024. Also, in the past 52 weeks, IBM stock gained almost 45%.\n\nIf you peruse IBM-related stories on InvestorPlace, I’ve been pounding my fist on the table for a reason. While other companies may be playing cute games with digital intelligence, IBM has been forwarding real solutions. So, I trust that if heaven forbid a severe downturn impacts the market, I can trust Big Blue on any dips.\n\nMicrosoft (MSFT) Microsoft logo close up. Microsoft (MSFT) Flagship Store Fifth Avenue, Manhattan, NYC.\n\nSource: The Art of Pics / Shutterstock.com\n\nAnother major tech giant with a long history, Microsoft (NASDAQ:MSFT) is one of the contemporary beneficiaries of the AI boon. Since the start of January, MSFT stock gained just under 10% of market value. In the past 52 weeks, it shot up almost 66%. With everyone still head over heels regarding digital intelligence, Microsoft may continue to rise.\n\nHowever, if the market suffers some indigestion, MSFT would easily rank among the stocks to buy for a down market. It’s not just about the AI investments, which has proven fruitful. However, the utility of generative AI is questionable at this moment. What’s not questionable? Microsoft’s dominance in most other areas of productive technologies.\n\nFor example, the business world might implode without Microsoft’s suite of office products. Programs like Word and Excel – though they do have their quirks and issues – remain indispensable. Further, the company dominates the PC operating system market environment.\n\nIf you want to draw some cute pictures, Apple (NASDAQ:AAPL) might be a better bet. For everything else, there’s Microsoft. It’s a strong buy for a reason.\n\nAmazon (AMZN) Closeup of the Amazon logo at Amazon campus in Palo Alto, California. The Palo Alto location hosts A9 Search, Amazon Web Services, and Amazon Game Studios teams. AMZN stock\n\nSource: Tada Images / Shutterstock.com\n\nTo be 100% clear, if you’re looking for a discounted opportunity, buying tech and e-commerce giant Amazon (NASDAQ:AMZN) right now is a tricky proposition. Just at a glance, you’re talking about a security that’s traded at a near-60X trailing-year earnings multiple. Not only that, the forward earnings multiple isn’t that much better at 41X. Still, if the red ink starts flying, AMZN should be on your watch list.\n\nIt’s real simple: the company has reached a knowledge-saturation point where it’s likely impossible to put the genie back in the bottle. With Amazon users enjoying the everyday convenience of product and food delivery, less incentive exists to shop in person. More than that, the company’s controversial role as the vacuum cleaner of small businesses everywhere has succeeded in one critical element: fostering effective economies of scale.\n\nThat might help to explain why even in an ecosystem impacted by stubbornly high inflation and interest rates, e-commerce as a percentage of total retail sales continues to rise since the second quarter of 2022.\n\nIt doesn’t make sense until you realize the (evil) genius behind Amazon. Clearly, it’s one of the stocks to buy for a down market.\n\nOn the date of publication, Josh Enomoto did not have (either directly or indirectly) any positions in the securities mentioned in this article. The opinions expressed in this article are those of the writer, subject to the InvestorPlace.com Publishing Guidelines.\n\nA former senior business analyst for Sony Electronics, Josh Enomoto has helped broker major contracts with Fortune Global 500 companies. Over the past several years, he has delivered unique, critical insights for the investment markets, as well as various other industries including legal, construction management, and healthcare. Tweet him at @EnomotoMedia.\n\nMore From InvestorPlace\n\nThe #1 AI Investment Might Be This Company You’ve Never Heard Of “America’s Top Trader” Issues A.I. Code Red: Act Now or Miss Out It doesn’t matter if you have $500 or $5 million. Do this now.\n\nThe post Don’t Panic! 7 Smart Stocks to Buy if the Markets Take a Tumble. appeared first on InvestorPlace.",
+        "link": "https://finance.yahoo.com/news/don-t-panic-7-smart-192632746.html",
+        "symbols": [
+            "AAPL.US",
+            "AMZN.US",
+            "CCC3.BE",
+            "CCC3.DU",
+            "CCC3.F",
+            "CCC3.HA",
+            "CCC3.HM",
+            "CCC3.MU",
+            "CCC3.STU",
+            "CCC3.XETRA",
+            "COCA34.SA",
+            "COLA.NEO",
+            "COST.US",
+            "IBM.US",
+            "IBM0.F",
+            "JNJ.BA",
+            "JNJ.BE",
+            "JNJ.DU",
+            "JNJ.F",
+            "JNJ.HM"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 1,
+            "neg": 0.037,
+            "neu": 0.811,
+            "pos": 0.152
+        }
+    },
+    {
+        "date": "2024-02-29T19:23:00+00:00",
+        "title": "Its a Bull Market You Know: Top Ranked Stocks to Ride the Trend",
+        "content": "This article’s title, “It’s a bull market you know!” is a quote from a famous investing book Reminiscences of a Stock Operator, which accounts the life of famous speculator Jesse Livermore.\n\nThe book, which is a must read for any stock trader, details the wins and losses of Livermore’s volatile life and shares many of his formative learning experiences. One of his earlier lessons occurred while he was hanging out at a brokerage firm he traded with. There he met a market veteran who went by the name Old Turkey.\n\nUp until this period Livermore was a very active trader, buying and selling shares at a high frequency, sometimes multiple times during the day. But this phrase from Old Turkey “It’s a bull market you know!” stuck with Livermore.\n\nOld Turkey would repeat it over and while at first, he thought it was just a platitude he learned that it held much deeper insights than that. Instead of trading in and out of stocks, taking profits and waiting for a dip to buy again, this phrase was an encouragement to hold on to you winners for as long as possible.\n\nPersisting Bull Market\n\nBull markets often endure much longer than investors expect. In fact, the US stock market spends the vast majority of time in bull markets that steadily grind higher, climbing a wall of worry.\n\nThis insight deeply changed the way Livermore approached the market. Instead of quick profits he now focused on the big trends and owning the leading stocks for as long as the bull market persisted.\n\nAlthough Livermore’s trading was marked by wild boom and busts, it was his overuse of leverage that was his Achilles heel. In fact, he would make huge profits riding these longer-term bull moves and occasional bear markets. TradingView\n\nImage Source: TradingView\n\nToday’s Market\n\nThe current market regime is one that has a litany of bullish tailwinds, and we are likely closer to the beginning of this bull market than the end. The factors include:\n\n-          AI revolution: The hype is real – AI tech could be as influential as the internet has been and will make major contributions to productivity gains.\n\nStory continues\n\n-          Strong economic growth: The US economy is showing above trend growth surprising nearly all economists on wall street.\n\n-          Interest rate cuts: It won’t be long before the Fed begins to lower rates again, beginning the expansionary cycle again.\n\nLeading Stocks\n\nOften, as a stock makes incredible gains, you will hear very loud voices talking about how “it has gone too far!” Just look at the commentary surrounding Nvidia NVDA, these traders have been saying this month after month, yet the stock pushes higher.\n\nLeading stocks lead for a reason, and in this current market they are leading because of growing sales and earnings. That is the opposite of hype and exactly what you want to see strong stocks do.\n\nAfter a little more than a year of using the Zacks Rank I have been continuously impressed by its ability to pick big winners. Nvidia and Meta Platforms META sat on the list for the majority of 2023, when most analysts doubted them, yet they were the biggest winners in the S&P 500.\n\nThere are a handful of stocks sitting on the Zacks Rank right now that have performed very well recently and I think are likely to continue. They represent the secular economic trends of this economy, have strong business models, growing earnings and of course top Zacks Ranks.\n\nMeta Platforms and Nvidia are still on the top of the list, and both enjoy Zacks Rank #1 (Strong Buy) ratings reflecting upward trending earnings revisions. EPS for Nvidia are forecast to grow an incredible 30% annually for the next 3-5 years and Meta’s are projected to climb 20% annually over the same period.\n\nThey also continue to show impressive relative strength against the market YTD. TradingView\n\nImage Source: TradingView\n\nAnother company that is quietly making a significant contribution to the semiconductor and AI industry is Cadence Design Systems CDNS. The company builds software for designing chips and leads the space.\n\nSoftware within the semiconductor industry is a particularly appealing vertical. Semiconductor production is a very high capex intensive business, while software is a high margin low capex business. Candence Design enjoys gross margins of 90% and net margins of 26%.\n\nIn addition to a Zacks Rank #1 (Strong Buy) rating, reflecting upward trending earnings revisions, CDNS also has a compelling technical trade setup. The price action of the stock has been forming a bullish consolidation, and a breakout should send the stock higher. TradingView\n\nImage Source: TradingView\n\nAmazon AMZN is another leader that is likely to continue to lead. Both the ecommerce business and cloud services boast massive tailwinds with the expansion of online retail and digital transformation. Amazon web services dominates the cloud industry with 31% of the market share.\n\nAdditionally, its advertising business has exploded from seemingly nowhere and now contributes $60 billion a year to the top line annually. The emergence of this business shows that Amazon continues to execute at a high level as it enters new highly competitive industries. Statista\n\nImage Source: Statista\n\nAmazon also has a Zacks Rank #1 (Strong Buy) rating, indicating upward trending earnings revisions. Earnings estimates are being upgraded significantly and EPS are expected to grow at a very high pace over the next 3-5 years. Earnings are projected to grow 28% annually over that time. Zacks Investment Research\n\nImage Source: Zacks Investment Research\n\nBottom Line\n\nThere will be hiccups along the way, 5% and 10% corrections as the market continues higher, but don’t let the bears scare you out of this market.\n\nIt’s a bull market you know!\n\nWant the latest recommendations from Zacks Investment Research? Today, you can download 7 Best Stocks for the Next 30 Days. Click to get this free report\n\nAmazon.com, Inc. (AMZN) : Free Stock Analysis Report\n\nNVIDIA Corporation (NVDA) : Free Stock Analysis Report\n\nCadence Design Systems, Inc. (CDNS) : Free Stock Analysis Report\n\nMeta Platforms, Inc. (META) : Free Stock Analysis Report\n\nTo read this article on Zacks.com click here.\n\nZacks Investment Research",
+        "link": "https://finance.yahoo.com/news/bull-market-know-top-ranked-192300737.html",
+        "symbols": [
+            "NVD.BE",
+            "NVD.DU",
+            "NVD.F",
+            "NVD.HA",
+            "NVD.HM",
+            "NVD.MU",
+            "NVD.STU",
+            "NVD.XETRA",
+            "NVDA.MX",
+            "NVDA.NEO",
+            "NVDA.US",
+            "NVDC34.SA",
+            "NVDG.F"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.996,
+            "neg": 0.017,
+            "neu": 0.883,
+            "pos": 0.1
+        }
+    },
+    {
+        "date": "2024-02-29T18:56:17+00:00",
+        "title": "AMD’s Market Value Tops $300 Billion on Wave of AI-Fueled Rally",
+        "content": "(Bloomberg) -- Advanced Micro Devices Inc. shares jumped Thursday, with the chipmaker extending a surge to hit its latest in a series of fresh records this year.\n\nMost Read from Bloomberg\n\nHow Much Wealth You Need to Join the Richest 1% Around the World Fed’s Preferred Inflation Metric Increases by Most in a Year Apple to Wind Down Electric Car Effort After Decadelong Odyssey Stocks Rise After ‘No New Bad News’ on Inflation: Markets Wrap Singapore’s Richest Banking Dynasty Grapples With Succession\n\nThe stock rose as much as 7.9%, a climb that has put the company’s market capitalization on track to close above $300 billion for the first time. Shares have more than doubled off an October low.\n\nThe company is seen as one of the primary beneficiaries of artificial intelligence, and last month, optimism about new AI processors helped AMD shares recover from a weak forecast.\n\nEarlier Thursday, Citigroup Inc. wrote that it remains “wildly bullish on semis,” especially as “the AI market continues to grow” with all kinds of businesses and organizations all buying AI chips. The firm singled out AMD as one of the stocks it favors, along with Nvidia Corp. and Broadcom Inc.\n\nStill, the stock doesn’t exactly look like a bargain after recent gains. Shares trade at nearly 50 times estimated earnings, making it far more expensive than industry leader Nvidia, whose multiple is a relatively milder 32 times.\n\nWhile analysts are broadly positive — more than three-fourths of the firms tracked by Bloomberg recommend buying AMD — shares are just 2% below the average price target, suggesting additional upside from here could be limited.\n\nMost Read from Bloomberg Businessweek\n\nChina’s Piano Dreams Are Fading for a Cash-Strapped Middle Class Elon Musk’s Vegas Tunnel Project Has Been Racking Up Safety Violations Chocolate Makers Try a New Recipe: Less Chocolate Hollywood Is Banking on Dune: Part Two to Revive the Blockbuster Experience There’s One Musk Endeavor That’s Not Doing So Great\n\n©2024 Bloomberg L.P.",
+        "link": "https://finance.yahoo.com/news/amd-market-value-tops-300-185617795.html",
+        "symbols": [
+            "0YXG.LSE",
+            "1YD.BE",
+            "1YD.DU",
+            "1YD.F",
+            "1YD.HA",
+            "1YD.HM",
+            "1YD.MU",
+            "1YD.STU",
+            "1YD.XETRA",
+            "A1MD34.SA",
+            "AMD.BE",
+            "AMD.DU",
+            "AMD.F",
+            "AMD.HM",
+            "AMD.MU",
+            "AMD.MX",
+            "AMD.NEO",
+            "AMD.STU",
+            "AMD.US",
+            "AMD.XETRA"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.992,
+            "neg": 0.043,
+            "neu": 0.78,
+            "pos": 0.177
+        }
+    }
+]
