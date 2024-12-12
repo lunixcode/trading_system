@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.env
+
+# Credentials
+config/credentials.py
+
+# Logs
+*.log
+
+# Data
+*.pkl
+*.h5
+
+# IDE
+.vscode/
+.idea/
