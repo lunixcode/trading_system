@@ -54,7 +54,7 @@ def fetch_latest_news(tickers):
 async def call_gpt_4_turbo(prompt):
     """Send a prompt to the GPT-4 Turbo model."""
     data = {
-        "model": "gpt-4-1106-preview",
+        "model": "gpt-4-turbo",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
         "temperature": 0.5
@@ -122,7 +122,7 @@ async def categorize_summarize_and_score(article_text, source, date):
     Please perform the following tasks:
 
     Primary check: 
-        - The news must relate to Nvidia stocks otherwise exit response here with non-related tag
+        - The news must relate to Nvidia stocks otherwise exit response here with non-related tag but print out what you have if nots related
 
     1. Categorize the news article based on these categories:
        - Official Quarterly Numbers (only from trusted sources).
