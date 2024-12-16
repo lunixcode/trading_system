@@ -4,11 +4,6 @@ import numpy as np
 from datetime import datetime, timedelta
 
 class DataPreprocessor:
-    """
-    Handles the preprocessing of financial data including alignment of different data sources,
-    feature engineering, and data cleaning.
-    """
-    
     def __init__(self, debug: bool = False):
         self.debug = debug
         self.timeframes = {
@@ -18,6 +13,9 @@ class DataPreprocessor:
             '1h': 'H',
             '1d': 'D'
         }
+        # Store aligned data in memory
+        self.aligned_data = {}
+        self.news_data = None
 
     def resample_price_data(self, price_data: pd.DataFrame, timeframe: str) -> pd.DataFrame:
         """Resample price data to specified timeframe."""
@@ -57,7 +55,7 @@ class DataPreprocessor:
         news_df = pd.DataFrame(news_data)
         news_df['date'] = pd.to_datetime(news_df['date'])
         
-        # Extract date components based on timeframe
+        # Extract date components for both datasets
         for df in [news_df, resampled_price]:
             df['year'] = df['date' if 'date' in df else 'Date'].dt.year
             df['month'] = df['date' if 'date' in df else 'Date'].dt.month
@@ -65,7 +63,6 @@ class DataPreprocessor:
             df['hour'] = df['date' if 'date' in df else 'Date'].dt.hour
             df['minute'] = df['date' if 'date' in df else 'Date'].dt.minute
         
-        # Add news index
         news_df['news_index'] = news_df.index
 
         # Create aligned DataFrame
@@ -127,84 +124,100 @@ class DataPreprocessor:
 
         return aligned_data, news_data
 
-    def align_all_timeframes(self, price_data: pd.DataFrame, news_data: List[dict]) -> Dict[str, pd.DataFrame]:
-        """
-        Align data for all timeframes.
-        
-        Returns:
-            Dictionary with aligned data for each timeframe
-        """
+    def align_all_timeframes(self, price_data: pd.DataFrame, news_data: List[dict]) -> Tuple[Dict[str, pd.DataFrame], List[dict]]:
+        """Align data for all timeframes."""
         if self.debug:
             print("\nProcessing all timeframes...")
         
-        aligned_data = {}
+        self.news_data = news_data  # Store news data
         
         for timeframe in self.timeframes.keys():
             if self.debug:
                 print(f"\nProcessing {timeframe} timeframe...")
             
-            aligned_df, news = self.align_price_and_news(price_data, news_data, timeframe)
-            aligned_data[timeframe] = aligned_df
+            aligned_df, _ = self.align_price_and_news(price_data, news_data, timeframe)
+            self.aligned_data[timeframe] = aligned_df
         
-        return aligned_data, news
+        return self.aligned_data, self.news_data
+
+    def get_data_for_date(self, date: str, timeframe: str = '1d') -> Tuple[pd.DataFrame, List[dict]]:
+        """Get all data for a specific date and timeframe."""
+        if timeframe not in self.aligned_data:
+            raise ValueError(f"No data available for timeframe {timeframe}")
+            
+        df = self.aligned_data[timeframe]
+        target_dt = pd.to_datetime(date)
+        
+        if timeframe == '1d':
+            mask = df['Date'].dt.date == target_dt.date()
+        else:
+            mask = df['Date'].dt.date == target_dt.date()
+            
+        return df[mask], self.news_data
+
+    def get_news_for_period(self, date: str, timeframe: str = '1d') -> List[dict]:
+        """Get news items for a specific period."""
+        df, news_data = self.get_data_for_date(date, timeframe)
+        
+        if df.empty:
+            return []
+            
+        news_items = []
+        for _, row in df.iterrows():
+            if row['news_count'] > 0:
+                indices = [int(idx) for idx in row['news_indices'].split(',')]
+                period_news = [news_data[idx] for idx in indices]
+                news_items.extend(period_news)
+                
+        return news_items
 
 def main():
-    """Test function for the DataPreprocessor"""
+    """Example usage of the DataPreprocessor"""
+    from datetime import datetime
     from HistoricalDataManager import HistoricalDataManager
     from DataValidator import DataValidator
     
+    # Initialize components
     hdm = HistoricalDataManager(debug=True)
     validator = DataValidator(debug=True)
     preprocessor = DataPreprocessor(debug=True)
     
+    # Load and process data
     symbol = 'AAPL'
     start_date = datetime(2024, 1, 1)
     end_date = datetime(2024, 3, 31)
     
-    try:
-        # Load and validate data
-        price_data = hdm.get_price_data(symbol, start_date, end_date)
-        raw_news_data = hdm.get_news_data(symbol, start_date, end_date)
-        _, _, valid_news_data = validator.validate_news_data(raw_news_data)
+    # Load initial data
+    price_data = hdm.get_price_data(symbol, start_date, end_date)
+    raw_news_data = hdm.get_news_data(symbol, start_date, end_date)
+    _, _, valid_news_data = validator.validate_news_data(raw_news_data)
+    
+    # Process all timeframes
+    preprocessor.align_all_timeframes(price_data, valid_news_data)
+    
+    # Example: Access data for specific date
+    test_date = "2024-01-15"
+    print(f"\nGetting data for {test_date}")
+    
+    # Get daily data
+    daily_df, news_data = preprocessor.get_data_for_date(test_date, '1d')
+    if not daily_df.empty:
+        print("\nDaily Data:")
+        print(daily_df[['Date', 'Close', 'news_count']].to_string())
         
-        # Process all timeframes
-        aligned_data_dict, news_data = preprocessor.align_all_timeframes(price_data, valid_news_data)
-        
-        # Save aligned data for each timeframe
-        for timeframe, aligned_data in aligned_data_dict.items():
-            output_file = f"{symbol}_aligned_{timeframe}.csv"
-            aligned_data.to_csv(output_file, index=False)
-            print(f"\nSaved {timeframe} aligned data to {output_file}")
-            print(f"Shape: {aligned_data.shape}")
-            print(f"Periods with news: {(aligned_data['news_count'] > 0).sum()}")
-        
-        # Save news data
-        news_file = f"{symbol}_news_data.json"
-        import json
-        with open(news_file, 'w') as f:
-            json.dump(news_data, f, indent=2)
-        print(f"\nSaved news data to {news_file}")
-        
-        # Show sample for each timeframe
-        print("\nSample of aligned data for each timeframe:")
-        for timeframe, aligned_data in aligned_data_dict.items():
-            news_periods = aligned_data[aligned_data['news_count'] > 0]
-            if not news_periods.empty:
-                print(f"\n{timeframe} Timeframe Sample:")
-                sample = news_periods[['Date', 'news_count', 'Close', 'news_indices']].head(3)
-                print(sample.to_string())
-                
-                # Show sample news for first period
-                first_period = sample.iloc[0]
-                print(f"\nSample news for {timeframe} period {first_period['Date']}:")
-                indices = [int(i) for i in first_period['news_indices'].split(',')]
-                for news_idx in indices[:2]:  # Show first 2 news items
-                    print(f"News [{news_idx}]: {news_data[news_idx]['title']}")
-        
-    except Exception as e:
-        import traceback
-        print(f"Error during processing: {str(e)}")
-        print(traceback.format_exc())
+        # Get news for this day
+        news_items = preprocessor.get_news_for_period(test_date, '1d')
+        if news_items:
+            print("\nNews Items:")
+            for item in news_items:
+                print(f"\nTime: {item['date']}")
+                print(f"Title: {item['title']}")
+    
+    # Get hourly data for the same day
+    hourly_df, _ = preprocessor.get_data_for_date(test_date, '1h')
+    if not hourly_df.empty:
+        print("\nHourly Data:")
+        print(hourly_df[['Date', 'Close', 'news_count']].to_string())
 
 if __name__ == "__main__":
     main()
