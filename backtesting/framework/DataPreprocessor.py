@@ -7,10 +7,10 @@ class DataPreprocessor:
     def __init__(self, debug: bool = False):
         self.debug = debug
         self.timeframes = {
-            '5min': '5T',
-            '15min': '15T',
-            '30min': '30T',
-            '1h': 'H',
+            '5min': '5min',
+            '15min': '15min',
+            '30min': '30min',
+            '1h': 'h',
             '1d': 'D'
         }
         # Store aligned data in memory
