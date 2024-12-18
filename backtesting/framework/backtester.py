@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from HistoricalDataManager import HistoricalDataManager
 from DataValidator import DataValidator
 from DataPreprocessor import DataPreprocessor
-from newsAnalysisNew import newsAnalysisNew
+from newsAnalysisNew import NewsAnalysis
 
 # Configure logging
 logging.basicConfig(
@@ -99,15 +99,25 @@ class NewsStrategy(bt.Strategy):
     params = (
         ('news_data', None),
         ('news_indices', None),
+        ('symbol', 'NVDA'),
+        ('model_choice', 'together'),  # default to gpt, can be overridden
     )
     
     def __init__(self):
-        self.news_analyzer = newsAnalysisNew(symbol="NVDA")
+        self.news_analyzer = NewsAnalysis(
+            symbol=self.p.symbol,
+            model_choice=self.p.model_choice
+        )
         self.order = None
         self.news_time = None
         self.processed_indices = set()
         self.current_bar = 0
         self.news_indices = self.p.news_indices
+        
+        # Log initialization
+        print(f"\nInitializing NewsStrategy:")
+        print(f"Symbol: {self.p.symbol}")
+        print(f"Model: {self.p.model_choice}")
     
     def next(self):
         current_datetime = self.data.datetime.datetime(0)
@@ -151,6 +161,7 @@ class NewsStrategy(bt.Strategy):
                             print("\nNews Analysis Results:")
                             print(f"Time: {current_datetime}")
                             print(f"Article: {article.get('title', 'No Title')}")
+                            print(f"Using Model: {self.p.model_choice}")
                             print(f"Analysis: {analysis}")
                 
                 self.processed_indices.update(new_indices)
@@ -158,11 +169,11 @@ class NewsStrategy(bt.Strategy):
         except Exception as e:
             print(f"Error processing news indices: {e}")
 
-def run_backtest(price_data_df, news_data, **kwargs):
+def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
     """Run backtest with fixed data types"""
     cerebro = bt.Cerebro()
     
-    print("\nPreparing data...")
+    print(f"\nPreparing data for backtest using {model_choice} model...")
     prepared_data = prepare_backtest_data(price_data_df)
     
     # Create data feed without news_indices
@@ -178,7 +189,9 @@ def run_backtest(price_data_df, news_data, **kwargs):
     cerebro.addstrategy(
         NewsStrategy,
         news_data=news_data,
-        news_indices=prepared_data.attrs.get('news_indices')
+        news_indices=prepared_data.attrs.get('news_indices'),
+        symbol=kwargs.get('symbol', 'NVDA'),
+        model_choice=model_choice
     )
     
     # Set initial capital
@@ -229,7 +242,9 @@ if __name__ == "__main__":
         results = run_backtest(
             price_data_df=aligned_data['5min'],
             news_data=processed_news,
-            initial_cash=100000.0
+            model_choice='together',  # Specify which model to use
+            initial_cash=100000.0,
+            symbol=symbol
         )
         
     except Exception as e:

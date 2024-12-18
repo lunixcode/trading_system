@@ -1,41 +1,201 @@
+# Standard library imports
+import os
 import asyncio
 import json
-import requests
-from datetime import datetime
-from typing import Dict, Tuple, Optional
-import logging
-from dotenv import load_dotenv
-import os
+from typing import Dict, Tuple, Optional, Literal
 
-class newsAnalysisNew:
-    """Analyzes news articles using two-stage AI processing"""
+# Third-party imports
+import requests
+import google.generativeai as genai
+import anthropic
+import together
+from dotenv import load_dotenv
+
+class NewsAnalysis:
+    """Analyzes news articles using multiple AI models with two-stage processing"""
     
-    def __init__(self, symbol: str):
+    def __init__(self, symbol: str, model_choice: Literal["gpt", "gemini", "claude", "together"] = "gpt"):
         self._setup_environment()
-        self._setup_logging()
         self.symbol = symbol
+        self.model_choice = model_choice
         self.processed_articles = set()
         
     def _setup_environment(self):
         """Initialize API keys and configurations"""
         load_dotenv()
-        self.openai_api_key = os.getenv('OPENAI_API_KEY')
-        if not self.openai_api_key:
-            raise ValueError("OpenAI API key not found in environment variables")
         
-        self.headers = {
-            "Authorization": f"Bearer {self.openai_api_key}",
-            "Content-Type": "application/json"
+        # OpenAI setup
+        self.openai_api_key = os.getenv('OPENAI_API_KEY')
+        if self.openai_api_key:
+            self.openai_headers = {
+                "Authorization": f"Bearer {self.openai_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+        # Gemini setup
+        self.gemini_api_key = os.getenv('GEMINI_API_KEY')
+        if self.gemini_api_key:
+            genai.configure(api_key=self.gemini_api_key)
+            self.gemini_model = genai.GenerativeModel('gemini-1.5-pro')
+            
+        # Claude setup
+        self.claude_api_key = os.getenv('ANTHROPIC_API_KEY')
+        if self.claude_api_key:
+            self.claude_client = anthropic.Anthropic(
+                api_key=self.claude_api_key
+            )
+            
+        # Together AI setup
+        self.together_api_key = os.getenv('TOGETHER_API_KEY')
+        if self.together_api_key:
+            together.api_key = self.together_api_key
+
+    async def _call_ai_model(self, prompt: str, detailed: bool = False) -> str:
+        """Make API call to selected AI model"""
+        try:
+            if self.model_choice == "gpt":
+                model = "gpt-4-turbo-preview" if detailed else "gpt-3.5-turbo"
+                data = {
+                    "model": model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 4096 if detailed else 500,
+                    "temperature": 0.5
+                }
+                response = requests.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers=self.openai_headers,
+                    json=data
+                )
+                response.raise_for_status()
+                return response.json()['choices'][0]['message']['content']
+                
+            elif self.model_choice == "gemini":
+                response = await self.gemini_model.generate_content_async(prompt)
+                return response.text
+                
+            elif self.model_choice == "claude":
+                response = self.claude_client.messages.create(
+                    model="claude-3-opus-20240229",
+                    max_tokens=4096 if detailed else 500,
+                    temperature=0.5,
+                    messages=[{
+                        "role": "user",
+                        "content": prompt
+                    }]
+                )
+                return response.content[0].text
+                
+            elif self.model_choice == "together":
+                # Available Models:
+                # - "togethercomputer/llama-2-70b-chat"  # Requires dedicated endpoint
+                # - "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Good for complex reasoning
+                # - "meta-llama/Llama-2-70b-chat-hf"  # Requires dedicated endpoint
+                # - "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"  # Good for instructions
+                # - "WizardLM/WizardLM-70B-V2"  # Requires dedicated endpoint
+                # - "google/gemma-7b-it"  # New Google model
+                # - "anthropic/claude-3-sonnet"  # Requires different API
+                # - "tiiuae/falcon-180B"  # Requires dedicated endpoint
+                # - "01-ai/Yi-34B-Chat"  # Good performance/cost ratio
+
+                formatted_prompt = f"""<s>[INST] {prompt} [/INST]</s>"""
+                try:
+                    response = together.Complete.create(
+                        prompt=formatted_prompt,
+                        model="mistralai/Mistral-7B-Instruct-v0.2",
+                        max_tokens=4096 if detailed else 500,
+                        temperature=0.5,
+                        top_p=0.7,
+                        top_k=50,
+                        repetition_penalty=1.1
+                    )
+                    
+                    # Check if response and choices exist
+                    if not response or 'choices' not in response:
+                        print("No valid response or choices from Together API")
+                        return None
+                        
+                    # Get text directly from choices
+                    if response['choices'] and 'text' in response['choices'][0]:
+                        return response['choices'][0]['text']
+                    else:
+                        print("No text in API response")
+                        return None
+                        
+                except Exception as e:
+                    print(f"Together API specific error: {str(e)}")
+                    return None
+                
+        except Exception as e:
+            print(f"API call failed: {e}")
+            return None
+
+    def _extract_impact_score(self, result: str) -> int:
+        """Extract impact score from AI model response"""
+        try:
+            if result and "**Impact**:" in result:
+                score_text = result.split("**Impact**:")[1].strip()
+                return int(score_text.split()[0])
+            return 0
+        except Exception:
+            return 0
+
+    def _parse_detailed_analysis(self, result: str) -> Dict:
+        """Parse the detailed analysis response into structured data"""
+        parsed = {
+            "scores": {
+                "sentiment": 0,
+                "relevancy": 0,
+                "reliability": 0,
+                "risk": 0,
+                "impact": 0
+            },
+            "action_plan": None,
+            "position_size": None,
+            "review_period": None,
+            "exit_conditions": None,
+            "raw_analysis": result
         }
         
-    def _setup_logging(self):
-        """Setup logging configuration"""
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        if not result:
+            return parsed
+            
+        try:
+            # Extract scores
+            score_lines = result.split('\n')
+            for line in score_lines:
+                if 'Sentiment' in line and ':' in line:
+                    parsed['scores']['sentiment'] = int(line.split(':')[1].strip().split('/')[0])
+                elif 'Relevancy' in line and ':' in line:
+                    parsed['scores']['relevancy'] = int(line.split(':')[1].strip().split('/')[0])
+                elif 'Source Reliability' in line and ':' in line:
+                    parsed['scores']['reliability'] = int(line.split(':')[1].strip().split('/')[0])
+                elif 'Risk Level' in line and ':' in line:
+                    parsed['scores']['risk'] = int(line.split(':')[1].strip().split('/')[0])
+                elif 'Market Impact' in line and ':' in line:
+                    parsed['scores']['impact'] = int(line.split(':')[1].strip().split('/')[0])
+            
+            # Extract action plan if total score >= 40
+            total_score = sum(parsed['scores'].values())
+            if total_score >= 40:
+                action_plan_start = result.find('Trading action plan:')
+                if action_plan_start != -1:
+                    action_plan_text = result[action_plan_start:]
+                    parsed['action_plan'] = action_plan_text
+                    
+                    # Extract specific components
+                    for component in ['Position sizing:', 'Review period:', 'Exit conditions:']:
+                        if component in action_plan_text:
+                            key = component.lower().replace(':', '').replace(' ', '_')
+                            value = action_plan_text.split(component)[1].split('\n')[0].strip()
+                            parsed[key] = value
+            
+            return parsed
+            
+        except Exception:
+            return {"error": "Failed to parse", "raw_analysis": result}
 
     async def initial_analysis(self, news_item: Dict) -> Tuple[int, str]:
         """First stage analysis for category and impact"""
-        
         prompt = f"""
         Please perform the following tasks:
 
@@ -69,16 +229,15 @@ class newsAnalysisNew:
         """
         
         try:
-            result = await self._call_gpt(prompt)
+            result = await self._call_ai_model(prompt)
             impact_score = self._extract_impact_score(result)
             return impact_score, result
         except Exception as e:
-            self.logger.error(f"Error in initial analysis: {e}")
+            print(f"Error in initial analysis: {e}")
             return 0, str(e)
 
     async def detailed_analysis(self, news_item: Dict, initial_analysis: str) -> Dict:
         """Second stage detailed analysis for high-impact news"""
-        
         prompt = f"""
         You are a leading quantitative analyst at Goldman Sachs. Perform a detailed analysis on this news:
         
@@ -103,70 +262,11 @@ class newsAnalysisNew:
         """
         
         try:
-            result = await self._call_gpt(prompt, max_tokens=4096)
+            result = await self._call_ai_model(prompt, detailed=True)
             return self._parse_detailed_analysis(result)
         except Exception as e:
-            self.logger.error(f"Error in detailed analysis: {e}")
+            print(f"Error in detailed analysis: {e}")
             return {"error": str(e)}
-
-    async def _call_gpt(self, prompt: str, max_tokens: int = 300) -> str:
-        """Make API call to GPT-4"""
-        data = {
-            "model": "gpt-4-turbo-preview",
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": max_tokens,
-            "temperature": 0.5
-        }
-        
-        try:
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=self.headers,
-                json=data
-            )
-            response.raise_for_status()
-            return response.json()['choices'][0]['message']['content']
-        except Exception as e:
-            self.logger.error(f"GPT API call failed: {e}")
-            raise
-
-    def _extract_impact_score(self, result: str) -> int:
-        """Extract impact score from GPT response"""
-        try:
-            if "**Impact**:" in result:
-                score_text = result.split("**Impact**:")[1].strip()
-                return int(score_text.split()[0])
-            return 0
-        except Exception as e:
-            self.logger.error(f"Error extracting impact score: {e}")
-            return 0
-
-    def _parse_detailed_analysis(self, result: str) -> Dict:
-        """Parse the detailed analysis response into structured data"""
-        try:
-            # Basic structure for parsed results
-            parsed = {
-                "scores": {
-                    "sentiment": 0,
-                    "relevancy": 0,
-                    "reliability": 0,
-                    "risk": 0,
-                    "impact": 0
-                },
-                "action_plan": None,
-                "position_size": None,
-                "review_period": None,
-                "exit_conditions": None,
-                "raw_analysis": result
-            }
-            
-            # Add more sophisticated parsing logic here
-            # This is a placeholder for the actual parsing implementation
-            
-            return parsed
-        except Exception as e:
-            self.logger.error(f"Error parsing detailed analysis: {e}")
-            return {"error": str(e), "raw_analysis": result}
 
     async def analyze_news(self, news_item: Dict) -> Dict:
         """Main method to analyze a news item"""
@@ -186,7 +286,8 @@ class newsAnalysisNew:
         analysis_result = {
             "initial_analysis": initial_result,
             "impact_score": impact_score,
-            "detailed_analysis": None
+            "detailed_analysis": None,
+            "model_used": self.model_choice
         }
         
         # If high impact, perform detailed analysis
@@ -195,29 +296,3 @@ class newsAnalysisNew:
             analysis_result["detailed_analysis"] = detailed_result
         
         return analysis_result
-
-# Example usage in backtester:
-"""
-# In your backtesting strategy
-class NewsStrategy(bt.Strategy):
-    def __init__(self):
-        self.news_analyzer = NewsAnalyzer(symbol="NVDA")
-        
-    async def analyze_news_impact(self, news_item):
-        result = await self.news_analyzer.analyze_news(news_item)
-        return result
-        
-    def next(self):
-        if self.data.news_count[0] > self.data.news_count[-1]:
-            # Get news for current minute
-            current_news = self.get_current_news()  # You'll need to implement this
-            
-            # Analyze the news
-            analysis = asyncio.run(self.analyze_news_impact(current_news))
-            
-            # Make trading decisions based on analysis
-            if analysis['impact_score'] >= 7:
-                if analysis['detailed_analysis']:
-                    # Implement trading logic based on detailed analysis
-                    pass
-"""
