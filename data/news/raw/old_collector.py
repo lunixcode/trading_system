@@ -314,7 +314,7 @@ def main():
     
     # Collect news from January 2024 to current month
     current_date = datetime.now()
-    collector.collect_news_range(1, 2024, current_date.month, current_date.year)
+    collector.collect_news_range(1, 2023, 1, 2024)
 
 if __name__ == "__main__":
     main()

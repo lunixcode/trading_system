@@ -100,7 +100,7 @@ class NewsStrategy(bt.Strategy):
         ('news_data', None),
         ('news_indices', None),
         ('symbol', 'NVDA'),
-        ('model_choice', 'together'),  # default to gpt, can be overridden
+        ('model_choice', 'gemini'),  # Changed default from 'together' to 'gemini'
     )
     
     def __init__(self):
@@ -113,6 +113,7 @@ class NewsStrategy(bt.Strategy):
         self.processed_indices = set()
         self.current_bar = 0
         self.news_indices = self.p.news_indices
+        self.articles_processed = 0  # Counter for processed articles
         
         # Log initialization
         print(f"\nInitializing NewsStrategy:")
@@ -158,11 +159,39 @@ class NewsStrategy(bt.Strategy):
                         )
                         
                         if analysis:
-                            print("\nNews Analysis Results:")
+                            print("\n" + "="*50)
+                            print("News Analysis Results:")
+                            print("="*50)
                             print(f"Time: {current_datetime}")
                             print(f"Article: {article.get('title', 'No Title')}")
-                            print(f"Using Model: {self.p.model_choice}")
-                            print(f"Analysis: {analysis}")
+                            print(f"Model Used: {self.p.model_choice}")
+                            print("-"*50)
+                            
+                            # Format initial analysis
+                            if 'initial_analysis' in analysis:
+                                print("\nInitial Analysis:")
+                                print(analysis['initial_analysis'])
+                            
+                            print(f"Impact Score: {analysis.get('impact_score', 'N/A')}")
+                            
+                            # Format detailed analysis if it exists
+                            if analysis.get('detailed_analysis'):
+                                print("\nDetailed Analysis:")
+                                detailed = analysis['detailed_analysis']
+                                if isinstance(detailed, dict):
+                                    if 'raw_analysis' in detailed:
+                                        print(detailed['raw_analysis'])
+                                    else:
+                                        for key, value in detailed.items():
+                                            print(f"{key}: {value}")
+                            print("="*50 + "\n")
+                        
+                        self.articles_processed += 1
+                        
+                        # Check if we've processed 5 articles
+                        if self.articles_processed % 5 == 0:
+                            print(f"\nProcessed {self.articles_processed} articles so far.")
+                            input("Press Enter to continue with the next set of articles...")
                 
                 self.processed_indices.update(new_indices)
             
@@ -217,6 +246,36 @@ def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
 
 if __name__ == "__main__":
     try:
+        print("\n" + "="*50)
+        print("News Analysis Backtesting System")
+        print("="*50)
+
+        # Model selection
+        print("\nAvailable Models:")
+        print("1. GPT-4 (gpt)")
+        print("2. Gemini Pro (gemini)")
+        print("3. Claude 3 (claude)")
+        print("4. Together AI (together)")
+        
+        while True:
+            model_choice = input("\nSelect model (enter the name in brackets): ").lower().strip()
+            if model_choice in ['gpt', 'gemini', 'claude', 'together']:
+                break
+            print("Invalid choice. Please select from the available models.")
+
+        # Stock selection
+        print("\nPopular Stocks:")
+        print("1. NVIDIA (NVDA)")
+        print("2. Apple (AAPL)")
+        print("3. Microsoft (MSFT)")
+        print("4. Tesla (TSLA)")
+        print("5. Meta (META)")
+        print("Or enter any other valid stock ticker")
+        
+        symbol = input("\nEnter stock symbol: ").upper().strip()
+
+        print(f"\nInitializing backtest for {symbol} using {model_choice} model...")
+        
         # Initialize components
         hdm = HistoricalDataManager()
         validator = DataValidator()
@@ -225,9 +284,8 @@ if __name__ == "__main__":
         # Set date range
         start_date = datetime(2024, 1, 1)
         end_date = datetime(2024, 1, 31)
-        symbol = "NVDA"
         
-        print("Loading data...")
+        print("\nLoading data...")
         # Get and prepare data
         price_data = hdm.get_price_data(symbol, start_date, end_date)
         news_data = hdm.get_news_data(symbol, start_date, end_date)
@@ -242,7 +300,7 @@ if __name__ == "__main__":
         results = run_backtest(
             price_data_df=aligned_data['5min'],
             news_data=processed_news,
-            model_choice='together',  # Specify which model to use
+            model_choice=model_choice,
             initial_cash=100000.0,
             symbol=symbol
         )
