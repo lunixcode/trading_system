@@ -183,7 +183,7 @@ def main():
     preprocessor = DataPreprocessor(debug=True)
     
     # Load and process data
-    symbol = 'AAPL'
+    symbol = 'NVDA'
     start_date = datetime(2024, 1, 1)
     end_date = datetime(2024, 3, 31)
     
