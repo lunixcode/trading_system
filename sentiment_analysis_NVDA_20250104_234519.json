@@ -1,0 +1,37 @@
+{
+    "analysis_period": {
+        "start": "2024-01-02 16:35:00+00:00",
+        "end": "2024-01-30 22:50:00+00:00"
+    },
+    "price_moves": {
+        "5min": {
+            "total_significant_moves": 0,
+            "stats": {}
+        },
+        "15min": {
+            "total_significant_moves": 0,
+            "stats": {}
+        },
+        "30min": {
+            "total_significant_moves": 0,
+            "stats": {}
+        },
+        "1h": {
+            "total_significant_moves": 0,
+            "stats": {}
+        },
+        "4h": {
+            "total_significant_moves": 0,
+            "stats": {}
+        },
+        "1D": {
+            "total_significant_moves": 0,
+            "stats": {}
+        }
+    },
+    "news_coverage": {
+        "total_news": 683,
+        "high_impact_news": 0
+    },
+    "sentiment_correlations": {}
+}

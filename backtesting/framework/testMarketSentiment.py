@@ -61,7 +61,6 @@ async def run_sentiment_analysis(debug_mode: bool = False):
         print("\nFetching price and news data...")
         price_data = hdm.get_price_data(symbol, start_date, end_date)
         news_data = hdm.get_news_data(symbol, start_date, end_date)
-        
         print("\nValidating news data...")
         _, _, valid_news = validator.validate_news_data(news_data)
         

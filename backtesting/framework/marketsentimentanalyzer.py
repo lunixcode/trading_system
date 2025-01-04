@@ -1,4 +1,5 @@
 # Standard library imports
+import json
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -131,57 +132,56 @@ class MarketSentimentAnalyzer:
 
     def _calculate_sentiment_metrics(self, analyzed_news: List[Dict]) -> pd.DataFrame:
         """Calculate sentiment metrics for different timeframes"""
-        self._debug_print(f"Processing {len(analyzed_news)} news items")
-        
         if not analyzed_news:
+            print("No news data provided")
             return pd.DataFrame()
             
-        # Debug the raw news data first
-        self._debug_print("Sample of raw news items:", analyzed_news[:2])
+        # First, flatten the sentiment structure
+        flattened_news = []
+        for news in analyzed_news:
+            flat_news = news.copy()
+            if 'sentiment' in news and isinstance(news['sentiment'], dict):
+                # Use polarity as our main sentiment score
+                flat_news['sentiment_score'] = news['sentiment'].get('polarity', 0)
+                flat_news['sentiment_positive'] = news['sentiment'].get('pos', 0)
+                flat_news['sentiment_negative'] = news['sentiment'].get('neg', 0)
+                flat_news['sentiment_neutral'] = news['sentiment'].get('neu', 0)
+            else:
+                flat_news['sentiment_score'] = 0
+                flat_news['sentiment_positive'] = 0
+                flat_news['sentiment_negative'] = 0
+                flat_news['sentiment_neutral'] = 0
+            flattened_news.append(flat_news)
             
-        news_df = pd.DataFrame(analyzed_news)
-        self._debug_print("Initial news dataframe columns:", news_df.columns.tolist())
+        news_df = pd.DataFrame(flattened_news)
+        if news_df.empty:
+            print("News DataFrame is empty")
+            return pd.DataFrame()
         
         # Time field handling
         time_field = next((field for field in ['date', 'timestamp', 'time'] 
                           if field in news_df.columns), None)
         
         if not time_field:
-            self._debug_print("No timestamp field found")
+            print("No timestamp field found in news data")
+            return pd.DataFrame()
+            
+        try:    
+            news_df[time_field] = pd.to_datetime(news_df[time_field], utc=True)
+            news_df.set_index(time_field, inplace=True)
+            
+            if self.debug:
+                print("\nDEBUG: Sentiment score summary:")
+                print(news_df['sentiment_score'].describe())
+                print("\nDEBUG: Sample of processed news data:")
+                print(news_df[['sentiment_score', 'sentiment_positive', 'sentiment_negative']].head())
+            
+            return self._process_metrics(news_df)
+            
+        except Exception as e:
+            print(f"Error in calculate_sentiment_metrics: {str(e)}")
             return pd.DataFrame()
         
-        # Debug available scores before processing
-        if 'sentiment_score' in news_df.columns:
-            self._debug_print("Original sentiment scores:", news_df['sentiment_score'].value_counts().head())
-        if 'impact_score' in news_df.columns:
-            self._debug_print("Original impact scores:", news_df['impact_score'].value_counts().head())
-            
-        news_df[time_field] = pd.to_datetime(news_df[time_field], utc=True)
-        news_df.set_index(time_field, inplace=True)
-        
-        # Column handling with debug info
-        required_columns = {
-            'sentiment_score': 'impact_score',
-            'category': 'category',
-            'impact_score': 'impact_score'
-        }
-        
-        for col, default_col in required_columns.items():
-            if col not in news_df.columns and default_col in news_df.columns:
-                self._debug_print(f"Using {default_col} for {col}")
-                news_df[col] = news_df[default_col]
-                self._debug_print(f"Values after setting {col}:", 
-                                news_df[col].value_counts().head())
-            elif col not in news_df.columns:
-                self._debug_print(f"No data for {col}, using default 0")
-                news_df[col] = 0
-        
-        # Debug final dataframe state before processing metrics
-        self._debug_print("Final dataframe columns:", news_df.columns.tolist())
-        self._debug_print("Final sentiment score stats:", 
-                         news_df['sentiment_score'].describe())
-                
-        return self._process_metrics(news_df)
 
     def _process_metrics(self, news_df: pd.DataFrame) -> pd.DataFrame:
         """Process metrics after initial setup"""
@@ -205,9 +205,9 @@ class MarketSentimentAnalyzer:
                         period_end=group.index[-1],
                         avg_sentiment=avg_sent,
                         news_volume=len(group),
-                        significant_news=len(group[group['impact_score'] >= 7]),
+                        significant_news=len(group[group['sentiment_score'] > 0.7]),  # Changed from impact_score
                         sentiment_momentum=group['sentiment_score'].diff().mean(),
-                        dominant_category=group['category'].mode()[0] if 'category' in group else 'unknown',
+                        dominant_category='news',  # Simplified for now
                         volatility=group['sentiment_score'].std()
                     )
                     metrics_list.append(vars(metrics))
@@ -216,7 +216,51 @@ class MarketSentimentAnalyzer:
         if not metrics_df.empty:
             metrics_df['period_start'] = pd.to_datetime(metrics_df['period_start'], utc=True)
             metrics_df.set_index('period_start', inplace=True)
-            self._debug_print("Final metrics dataframe:", metrics_df)
+            self._debug_print("Final metrics shape:", metrics_df.shape)
+        
+        return metrics_df
+
+    def _find_significant_moves(self, price_data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        """Find top 10 price moves for each timeframe"""
+        self._debug_print("\nFinding significant moves")
+        significant_moves = {}
+        
+        for tf in self.timeframes:
+            self._debug_print(f"\nProcessing timeframe: {tf}")
+            
+            # Calculate moves for timeframe
+            moves_df = self._calculate_price_moves(price_data, tf)
+            
+            if moves_df.empty:
+                self._debug_print(f"No price data for timeframe {tf}")
+                continue
+                
+            # Add debug prints for price changes
+            self._debug_print("Price changes summary:", moves_df['price_change'].describe())
+            
+            # Find top 10 up and down moves
+            top_up = moves_df[moves_df['price_change'] > 0].nlargest(10, 'price_change')
+            top_down = moves_df[moves_df['price_change'] < 0].nsmallest(10, 'price_change')
+            
+            self._debug_print(f"Found {len(top_up)} up moves and {len(top_down)} down moves")
+            
+            if len(top_up) == 0 and len(top_down) == 0:
+                self._debug_print("No significant moves found")
+                continue
+                
+            # Combine and sort by absolute value of price change
+            top_moves = pd.concat([top_up, top_down])
+            top_moves['abs_change'] = abs(top_moves['price_change'])
+            top_moves = top_moves.sort_values('abs_change', ascending=False)
+            
+            # Add additional metrics
+            top_moves['volume_change'] = top_moves['Volume'].pct_change()
+            top_moves['volatility'] = (top_moves['High'] - top_moves['Low']) / top_moves['Open']
+            
+            significant_moves[tf] = top_moves
+            self._debug_print(f"Significant moves for {tf}", top_moves)
+
+        return significant_moves
 
     def _correlate_with_price_moves(self, 
                                   price_data: pd.DataFrame, 
@@ -351,6 +395,10 @@ class MarketSentimentAnalyzer:
             
             # Calculate sentiment metrics
             sentiment_metrics = self._calculate_sentiment_metrics(analyzed_news)
+            
+            # Ensure we have a DataFrame, not None
+            if sentiment_metrics is None:
+                sentiment_metrics = pd.DataFrame()
             
             # Initialize summary structure
             summary = {
