@@ -1,0 +1,13 @@
+{
+    "average_sentiment": 0.8077420902372919,
+    "sentiment_volatility": 0.24903733080192958,
+    "total_news_events": 4098,
+    "correlation_stats": {
+        "avg_move_size": null,
+        "avg_pre_sentiment": null,
+        "avg_post_sentiment": null,
+        "avg_sentiment_shift": null,
+        "avg_news_volume": null,
+        "sentiment_move_correlation": null
+    }
+}

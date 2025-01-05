@@ -1,24 +1,28 @@
+import os
 import requests
 import time
-from datetime import datetime
-from typing import List, Dict, Optional
 import logging
+from datetime import datetime
+from typing import List, Dict
 
-class NewsFetcher:
+class WebSearchNewsFetcher:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://api.bing.microsoft.com/v7.0/news/search"
+        # Web Search endpoint (not the News endpoint)
+        self.base_url = "https://api.bing.microsoft.com/v7.0/search"
+
+        # Only three companies
         self.companies = {
             "NVDA": "Nvidia",
-            "TSLA": "Tesla",
             "MSFT": "Microsoft",
-            "GOOGL": "Google",
-            "META": "Meta"
+            "GOOGL": "Alphabet"
         }
+
         self.headers = {
-            "Ocp-Apim-Subscription-Key": self.api_key,
+            "Ocp-Apim-Subscription-Key": self.api_key
         }
-        # Setup logging
+
+        # Set up logging
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s'
@@ -27,14 +31,13 @@ class NewsFetcher:
 
     def fetch_company_news(self, company_name: str, ticker: str) -> List[Dict]:
         """
-        Fetch news for a specific company
+        Use Bing Web Search endpoint with 'responseFilter=News' to get news-like results.
         """
         try:
             params = {
-                "q": f"{company_name} OR {ticker} stock",
-                "count": 10,  # Number of news articles per company
-                "freshness": "Day",  # Get news from the last 24 hours
-                "sortBy": "Date"  # Get most recent news first
+                "q": f"{company_name} OR {ticker} stock"
+                #"responseFilter": "News",   # Important: filter out everything but news
+                #'"count": 10                # number of results
             }
             
             response = requests.get(
@@ -44,11 +47,13 @@ class NewsFetcher:
             )
             response.raise_for_status()
             
-            news_data = response.json()
+            data = response.json()
             
-            # Process and clean the news data
+            # Bing Web Search with responseFilter=News typically puts articles under data["news"]["value"]
+            news_items = data.get("news", {}).get("value", [])
+
             processed_news = []
-            for article in news_data.get("value", []):
+            for article in news_items:
                 processed_news.append({
                     "company": company_name,
                     "ticker": ticker,
@@ -56,33 +61,35 @@ class NewsFetcher:
                     "description": article.get("description"),
                     "url": article.get("url"),
                     "published": article.get("datePublished"),
-                    "source": article.get("provider", [{}])[0].get("name"),
+                    "source": (article.get("provider", [{}])[0].get("name")
+                               if article.get("provider") else None),
                     "timestamp": datetime.now().isoformat()
                 })
             
             return processed_news
-            
+
         except requests.RequestException as e:
             self.logger.error(f"Error fetching news for {company_name}: {str(e)}")
             return []
 
     def fetch_all_news(self) -> List[Dict]:
         """
-        Fetch news for all companies
+        Fetch news-like results for all three companies.
         """
         all_news = []
         for ticker, company in self.companies.items():
-            self.logger.info(f"Fetching news for {company} ({ticker})")
+            self.logger.info(f"Fetching (web-based) news for {company} ({ticker})")
             company_news = self.fetch_company_news(company, ticker)
             all_news.extend(company_news)
-            time.sleep(2)  # Rate limiting between requests
+            
+            # Sleep a bit between calls if needed
+            time.sleep(2)
         
         return all_news
 
     def start_monitoring(self, callback=None):
         """
-        Start continuous monitoring with 1-minute intervals
-        callback: Optional function to handle the news data
+        Continuously fetch web-based 'news' every minute.
         """
         while True:
             try:
@@ -92,25 +99,23 @@ class NewsFetcher:
                 if callback and news:
                     callback(news)
                 else:
-                    self.logger.info(f"Found {len(news)} news articles")
+                    self.logger.info(f"Found {len(news)} news articles (via Web Search)")
                 
-                time.sleep(60)  # Wait for 1 minute
-                
+                time.sleep(60)  # Wait 1 minute before the next round
+
             except Exception as e:
                 self.logger.error(f"Error in monitoring loop: {str(e)}")
-                time.sleep(60)  # Wait before retrying
+                time.sleep(60)
 
 # Example usage:
 if __name__ == "__main__":
-    API_KEY = "your_bing_api_key"
-    
-    # Initialize the news fetcher
-    news_fetcher = NewsFetcher(API_KEY)
-    
-    # Example callback function
+    API_KEY = os.getenv('MICROSOFT_API_KEY')  # or paste your key here for testing
+
+    fetcher = WebSearchNewsFetcher(API_KEY)
+
+    # Simple callback to print new articles
     def handle_news(news_items):
         for item in news_items:
-            print(f"New article for {item['company']}: {item['title']}")
-    
-    # Start monitoring with the callback
-    news_fetcher.start_monitoring(callback=handle_news)
+            print(f"{item['company']} (Ticker: {item['ticker']}) - {item['title']}")
+
+    fetcher.start_monitoring(callback=handle_news)
