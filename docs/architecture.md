@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
     subgraph RTS["Real-time Trading System"]
         NC[NewsCollector]
