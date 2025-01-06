@@ -1,0 +1,3 @@
+python -c "import os; print('\n'.join(f for f in os.popen('tree /f').readlines()))"
+
+RUN FROM ROOT

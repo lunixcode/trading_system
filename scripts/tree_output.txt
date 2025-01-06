@@ -1,0 +1,657 @@
+Folder PATH listing
+
+Volume serial number is 8EF8-A1D0
+
+C:.
+
+¦   .env
+
+¦   .gitignore
+
+¦   AAPL_aligned_15min.csv
+
+¦   AAPL_aligned_1d.csv
+
+¦   AAPL_aligned_1h.csv
+
+¦   AAPL_aligned_30min.csv
+
+¦   AAPL_aligned_5min.csv
+
+¦   AAPL_news_data.json
+
+¦   AAPL_preprocessed_1d.csv
+
+¦   AAPL_preprocessed_1H_sample.csv
+
+¦   AAPL_preprocessed_sample.csv
+
+¦   README.md
+
+¦   requirements.txt
+
+¦   sentiment_analysis_20250102_214600.json
+
+¦   sentiment_analysis_NVDA_20250103_002141.json
+
+¦   sentiment_analysis_NVDA_20250104_234519.json
+
+¦   sentiment_analysis_NVDA_20250104_234910.json
+
+¦   sentiment_analysis_NVDA_20250105_010752.json
+
+¦   sentiment_analysis_NVDA_20250105_181336.json
+
+¦   tree_output.txt
+
+¦   
+
++---backtesting
+
+¦   +---framework
+
+¦   ¦   ¦   azdataExample.py
+
+¦   ¦   ¦   backtester.py
+
+¦   ¦   ¦   dataimportLog.txt
+
+¦   ¦   ¦   DataPreprocessor.py
+
+¦   ¦   ¦   DataProcessing.py
+
+¦   ¦   ¦   datapullTest.py
+
+¦   ¦   ¦   DataValidator.py
+
+¦   ¦   ¦   HistoricalDataManager.py
+
+¦   ¦   ¦   marketsentimentanalyzer.py
+
+¦   ¦   ¦   MetricSaver.py
+
+¦   ¦   ¦   newsAnalysisNew.py
+
+¦   ¦   ¦   optimizer.py
+
+¦   ¦   ¦   testMarketSentiment.py
+
+¦   ¦   ¦   testscriptdatarange.py
+
+¦   ¦   ¦   test_historical_data.py
+
+¦   ¦   ¦   timefiltercheckscript.py
+
+¦   ¦   ¦   __init__.py
+
+¦   ¦   ¦   
+
+¦   ¦   +---__pycache__
+
+¦   ¦           DataPreprocessor.cpython-310.pyc
+
+¦   ¦           DataValidator.cpython-310.pyc
+
+¦   ¦           HistoricalDataManager.cpython-310.pyc
+
+¦   ¦           marketsentimentanalyzer.cpython-310.pyc
+
+¦   ¦           MetricSaver.cpython-310.pyc
+
+¦   ¦           newsAnalysisNew.cpython-310.pyc
+
+¦   ¦           
+
+¦   +---strategy
+
+¦           developer.py
+
+¦           __init__.py
+
+¦           
+
++---config
+
+¦       credentials.py.template
+
+¦       settings.py
+
+¦       __init__.py
+
+¦       
+
++---data
+
+¦   ¦   NVDA_complete_analysis_all_20250105_181938.json
+
+¦   ¦   
+
+¦   +---correlations
+
+¦   +---fundamentals
+
+¦   ¦   ¦   AAPL_2024.json
+
+¦   ¦   ¦   AMZN_2024.json
+
+¦   ¦   ¦   edgarRetriever.py
+
+¦   ¦   ¦   GOOGL_2024.json
+
+¦   ¦   ¦   META_2024.json
+
+¦   ¦   ¦   NVDA_2024.json
+
+¦   ¦   ¦   
+
+¦   ¦   +---logs
+
+¦   ¦           fundamentals_collector.log
+
+¦   ¦           
+
+¦   +---news
+
+¦   ¦   +---db
+
+¦   ¦   ¦       news.db
+
+¦   ¦   ¦       
+
+¦   ¦   +---raw
+
+¦   ¦       ¦   old_collector.py
+
+¦   ¦       ¦   
+
+¦   ¦       +---2024
+
+¦   ¦           +---01
+
+¦   ¦           ¦       AAPL_2024_01.json
+
+¦   ¦           ¦       AMZN_2024_01.json
+
+¦   ¦           ¦       GOOGL_2024_01.json
+
+¦   ¦           ¦       META_2024_01.json
+
+¦   ¦           ¦       NVDA_2024_01.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---02
+
+¦   ¦           ¦       AAPL_2024_02.json
+
+¦   ¦           ¦       AMZN_2024_02.json
+
+¦   ¦           ¦       GOOGL_2024_02.json
+
+¦   ¦           ¦       META_2024_02.json
+
+¦   ¦           ¦       NVDA_2024_02.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---03
+
+¦   ¦           ¦       AAPL_2024_03.json
+
+¦   ¦           ¦       AMZN_2024_03.json
+
+¦   ¦           ¦       GOOGL_2024_03.json
+
+¦   ¦           ¦       META_2024_03.json
+
+¦   ¦           ¦       NVDA_2024_03.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---04
+
+¦   ¦           ¦       AAPL_2024_04.json
+
+¦   ¦           ¦       AMZN_2024_04.json
+
+¦   ¦           ¦       GOOGL_2024_04.json
+
+¦   ¦           ¦       META_2024_04.json
+
+¦   ¦           ¦       NVDA_2024_04.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---05
+
+¦   ¦           ¦       AAPL_2024_05.json
+
+¦   ¦           ¦       AMZN_2024_05.json
+
+¦   ¦           ¦       GOOGL_2024_05.json
+
+¦   ¦           ¦       META_2024_05.json
+
+¦   ¦           ¦       NVDA_2024_05.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---06
+
+¦   ¦           ¦       AAPL_2024_06.json
+
+¦   ¦           ¦       AMZN_2024_06.json
+
+¦   ¦           ¦       GOOGL_2024_06.json
+
+¦   ¦           ¦       META_2024_06.json
+
+¦   ¦           ¦       NVDA_2024_06.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---07
+
+¦   ¦           ¦       AAPL_2024_07.json
+
+¦   ¦           ¦       AMZN_2024_07.json
+
+¦   ¦           ¦       GOOGL_2024_07.json
+
+¦   ¦           ¦       META_2024_07.json
+
+¦   ¦           ¦       NVDA_2024_07.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---08
+
+¦   ¦           ¦       AAPL_2024_08.json
+
+¦   ¦           ¦       AMZN_2024_08.json
+
+¦   ¦           ¦       GOOGL_2024_08.json
+
+¦   ¦           ¦       META_2024_08.json
+
+¦   ¦           ¦       NVDA_2024_08.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---09
+
+¦   ¦           ¦       AAPL_2024_09.json
+
+¦   ¦           ¦       AMZN_2024_09.json
+
+¦   ¦           ¦       GOOGL_2024_09.json
+
+¦   ¦           ¦       META_2024_09.json
+
+¦   ¦           ¦       NVDA_2024_09.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---10
+
+¦   ¦           ¦       AAPL_2024_10.json
+
+¦   ¦           ¦       AMZN_2024_10.json
+
+¦   ¦           ¦       GOOGL_2024_10.json
+
+¦   ¦           ¦       META_2024_10.json
+
+¦   ¦           ¦       NVDA_2024_10.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---11
+
+¦   ¦           ¦       AAPL_2024_11.json
+
+¦   ¦           ¦       AMZN_2024_11.json
+
+¦   ¦           ¦       GOOGL_2024_11.json
+
+¦   ¦           ¦       META_2024_11.json
+
+¦   ¦           ¦       NVDA_2024_11.json
+
+¦   ¦           ¦       
+
+¦   ¦           +---12
+
+¦   ¦                   AAPL_2024_12.json
+
+¦   ¦                   AMZN_2024_12.json
+
+¦   ¦                   GOOGL_2024_12.json
+
+¦   ¦                   META_2024_12.json
+
+¦   ¦                   NVDA_2024_12.json
+
+¦   ¦                   
+
+¦   +---price
+
+¦   ¦   ¦   stockPrices.py
+
+¦   ¦   ¦   
+
+¦   ¦   +---raw
+
+¦   ¦       +---2024
+
+¦   ¦           +---01
+
+¦   ¦           ¦       AAPL.NAS_2024_01.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_01.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_01.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_01.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_01.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---02
+
+¦   ¦           ¦       AAPL.NAS_2024_02.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_02.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_02.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_02.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_02.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---03
+
+¦   ¦           ¦       AAPL.NAS_2024_03.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_03.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_03.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_03.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_03.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---04
+
+¦   ¦           ¦       AAPL.NAS_2024_04.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_04.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_04.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_04.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_04.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---05
+
+¦   ¦           ¦       AAPL.NAS_2024_05.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_05.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_05.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_05.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_05.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---06
+
+¦   ¦           ¦       AAPL.NAS_2024_06.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_06.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_06.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_06.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_06.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---07
+
+¦   ¦           ¦       AAPL.NAS_2024_07.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_07.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_07.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_07.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_07.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---08
+
+¦   ¦           ¦       AAPL.NAS_2024_08.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_08.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_08.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_08.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_08.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---09
+
+¦   ¦           ¦       AAPL.NAS_2024_09.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_09.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_09.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_09.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_09.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---10
+
+¦   ¦           ¦       AAPL.NAS_2024_10.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_10.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_10.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_10.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_10.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---11
+
+¦   ¦           ¦       AAPL.NAS_2024_11.csv
+
+¦   ¦           ¦       AMZN.NAS_2024_11.csv
+
+¦   ¦           ¦       GOOG.NAS_2024_11.csv
+
+¦   ¦           ¦       MVRS.NAS_2024_11.csv
+
+¦   ¦           ¦       NVDA.NAS_2024_11.csv
+
+¦   ¦           ¦       
+
+¦   ¦           +---12
+
+¦   ¦                   AAPL.NAS_2024_12.csv
+
+¦   ¦                   AMZN.NAS_2024_12.csv
+
+¦   ¦                   GOOG.NAS_2024_12.csv
+
+¦   ¦                   MVRS.NAS_2024_12.csv
+
+¦   ¦                   NVDA.NAS_2024_12.csv
+
+¦   ¦                   
+
+¦   +---price_moves
+
+¦   ¦       NVDA_price_moves_15min_20250105_181941.json
+
+¦   ¦       NVDA_price_moves_1D_20250105_181942.json
+
+¦   ¦       NVDA_price_moves_1h_20250105_181942.json
+
+¦   ¦       NVDA_price_moves_30min_20250105_181941.json
+
+¦   ¦       NVDA_price_moves_4h_20250105_181942.json
+
+¦   ¦       NVDA_price_moves_5min_20250105_181941.json
+
+¦   ¦       
+
+¦   +---sentiment
+
+¦           NVDA_sentiment_15min_20250105_181941.json
+
+¦           NVDA_sentiment_1D_20250105_181943.json
+
+¦           NVDA_sentiment_1h_20250105_181942.json
+
+¦           NVDA_sentiment_30min_20250105_181942.json
+
+¦           NVDA_sentiment_4h_20250105_181942.json
+
+¦           NVDA_sentiment_5min_20250105_181941.json
+
+¦           
+
++---docs
+
+¦       architecture.md
+
+¦       progress_tracker.md
+
+¦       
+
++---quantitative
+
+¦   +---analysis
+
+¦   ¦       fundamental.py
+
+¦   ¦       machine_learning.py
+
+¦   ¦       statistical.py
+
+¦   ¦       technical.py
+
+¦   ¦       __init__.py
+
+¦   ¦       
+
+¦   +---data
+
+¦           historical.py
+
+¦           preprocessor.py
+
+¦           __init__.py
+
+¦           
+
++---realtime
+
+¦   +---calendar
+
+¦   ¦       builder.py
+
+¦   ¦       optimizer.py
+
+¦   ¦       __init__.py
+
+¦   ¦       
+
+¦   +---news
+
+¦   ¦       analyzer.py
+
+¦   ¦       collector.py
+
+¦   ¦       newCollector.py
+
+¦   ¦       old_collector.py
+
+¦   ¦       __init__.py
+
+¦   ¦       
+
+¦   +---trading
+
+¦           analyzer.py
+
+¦           manager.py
+
+¦           __init__.py
+
+¦           
+
++---scripts
+
+¦       fileTree.py
+
+¦       filetreePrintout.txt
+
+¦       newsAnalyserBasic.py
+
+¦       
+
++---tests
+
+¦   +---test_backtesting
+
+¦   ¦       __init__.py
+
+¦   ¦       
+
+¦   +---test_quantitative
+
+¦   ¦       __init__.py
+
+¦   ¦       
+
+¦   +---test_realtime
+
+¦           __init__.py
+
+¦           
+
++---utils
+
+        database.py
+
+        logging.py
+
+        notifications.py
+
+        __init__.py
+
+        
