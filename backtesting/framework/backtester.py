@@ -14,11 +14,13 @@ import numpy as np
 import requests
 from dotenv import load_dotenv
 
+
 # Local imports
 from HistoricalDataManager import HistoricalDataManager
 from DataValidator import DataValidator
 from DataPreprocessor import DataPreprocessor
 from newsAnalysisNew import NewsAnalysis
+from TradeLogic import TradeLogic
 
 # Configure logging
 logging.basicConfig(
@@ -44,9 +46,9 @@ def prepare_backtest_data(df):
     """Prepare DataFrame for Backtrader with correct date handling"""
     df = df.copy()
     
-    print("\nBefore date processing:")
-    print(df.index[:5])
-    print(df['Date'].head() if 'Date' in df.columns else "No Date column")
+    #print("\nBefore date processing:")
+    #print(df.index[:5])
+    #print(df['Date'].head() if 'Date' in df.columns else "No Date column")
     
     # Proper date handling
     if 'Date' in df.columns:
@@ -60,8 +62,8 @@ def prepare_backtest_data(df):
         # If no Date column but index isn't datetime, try to convert index
         df.index = pd.to_datetime(df.index)
     
-    print("\nAfter date processing:")
-    print(df.index[:5])
+    #print("\nAfter date processing:")
+    #print(df.index[:5])
     
     # Store news indices separately
     news_indices = None
@@ -89,114 +91,112 @@ def prepare_backtest_data(df):
     # Store news indices in metadata
     df.attrs['news_indices'] = news_indices
     
-    print("\nFinal data check:")
-    print("Index type:", type(df.index))
-    print("First few dates:", df.index[:5])
+    #print("\nFinal data check:")
+    #print("Index type:", type(df.index))
+    #print("First few dates:", df.index[:5])
     
     return df
 
 class NewsStrategy(bt.Strategy):
     params = (
-        ('news_data', None),
-        ('news_indices', None),
-        ('symbol', 'NVDA'),
-        ('model_choice', 'gemini'),  # Changed default from 'together' to 'gemini'
+        ('news_data', None),          # Pre-analyzed news data
+        ('news_indices', None),       # News indices for time alignment
+        ('symbol', 'NVDA'),          
+        ('initial_cash', 100000.0),
+        ('max_position_size', 100),
+        ('max_exposure', 0.2),
+        ('trailing_stop_pct', 0.02),
+        ('max_drawdown_pct', 0.05)
     )
     
     def __init__(self):
-        self.news_analyzer = NewsAnalysis(
-            symbol=self.p.symbol,
-            model_choice=self.p.model_choice
+        # Initialize TradeLogic
+        self.trade_logic = TradeLogic(
+            initial_capital=self.p.initial_cash,
+            max_position_size=self.p.max_position_size,
+            max_exposure=self.p.max_exposure,
+            trailing_stop_pct=self.p.trailing_stop_pct,
+            max_drawdown_pct=self.p.max_drawdown_pct
         )
+        
         self.order = None
-        self.news_time = None
-        self.processed_indices = set()
         self.current_bar = 0
         self.news_indices = self.p.news_indices
-        self.articles_processed = 0  # Counter for processed articles
-        
-        # Log initialization
-        print(f"\nInitializing NewsStrategy:")
-        print(f"Symbol: {self.p.symbol}")
-        print(f"Model: {self.p.model_choice}")
+        self.processed_indices = set()
     
     def next(self):
-        current_datetime = self.data.datetime.datetime(0)
-        
-        # Check for news
-        if self.data.news_count[0] > 0:
-            print(f"\nProcessing bar {self.current_bar} at {current_datetime}")
-            print(f"News count: {self.data.news_count[0]}")
+        # First update any existing positions
+        if self.trade_logic.open_positions:
+            current_prices = {self.p.symbol: self.data.close[0]}
+            trades_to_execute = self.trade_logic.update_positions(
+                current_prices, 
+                self.data.datetime.datetime(0)
+            )
             
-            # Get news indices for current bar if available
-            if self.news_indices is not None:
-                current_indices = self.news_indices.iloc[self.current_bar]
-                if pd.notna(current_indices) and str(current_indices).strip():
-                    self.process_news(current_indices, current_datetime)
+            # Execute any position updates (e.g., trailing stop hits)
+            for trade in trades_to_execute:
+                self.execute_trade(trade)
+
+        # Process any new news signals
+        if self.data.news_count[0] > 0:
+            current_indices = self.news_indices.iloc[self.current_bar]
+            if pd.notna(current_indices) and str(current_indices).strip():
+                self.process_news_signals(current_indices)
         
         self.current_bar += 1
-    
-    def process_news(self, indices_str, current_datetime):
-        """Process news for current bar"""
+
+    def process_news_signals(self, indices_str: str):
+        """Process pre-analyzed news signals"""
         try:
             indices = [int(idx.strip()) for idx in str(indices_str).split(',') if idx.strip()]
             new_indices = set(indices) - self.processed_indices
             
             if new_indices:
-                print(f"Found {len(new_indices)} new articles to analyze")
-                
                 for idx in new_indices:
                     if idx < len(self.p.news_data):
-                        article = self.p.news_data[idx]
-                        try:
-                            loop = asyncio.get_event_loop()
-                        except RuntimeError:
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                            
-                        analysis = loop.run_until_complete(
-                            self.news_analyzer.analyze_news(article)
+                        # Get pre-analyzed news data
+                        analysis = self.p.news_data[idx]
+                        
+                        print("\n" + "="*50)
+                        print("Processing News Article:")
+                        print(f"Index: {idx}")
+                        print(f"Raw News Data: {self.p.news_data[idx]}")  # Added this line
+                        print(f"Initial Analysis: {analysis.get('initial_analysis', 'No initial analysis')}")
+                        print(f"Impact Score: {analysis.get('impact_score', 0)}")
+                        print(f"Has Detailed Analysis: {'Yes' if analysis.get('detailed_analysis') else 'No'}")
+                        print("="*50 + "\n")
+                        
+                        # Get trading decision from TradeLogic
+                        action, trade_details = self.trade_logic.process_news_analysis(
+                            analysis,
+                            self.data.close[0],
+                            self.data.datetime.datetime(0).isoformat()
                         )
                         
-                        if analysis:
-                            print("\n" + "="*50)
-                            print("News Analysis Results:")
-                            print("="*50)
-                            print(f"Time: {current_datetime}")
-                            print(f"Article: {article.get('title', 'No Title')}")
-                            print(f"Model Used: {self.p.model_choice}")
-                            print("-"*50)
-                            
-                            # Format initial analysis
-                            if 'initial_analysis' in analysis:
-                                print("\nInitial Analysis:")
-                                print(analysis['initial_analysis'])
-                            
-                            print(f"Impact Score: {analysis.get('impact_score', 'N/A')}")
-                            
-                            # Format detailed analysis if it exists
-                            if analysis.get('detailed_analysis'):
-                                print("\nDetailed Analysis:")
-                                detailed = analysis['detailed_analysis']
-                                if isinstance(detailed, dict):
-                                    if 'raw_analysis' in detailed:
-                                        print(detailed['raw_analysis'])
-                                    else:
-                                        for key, value in detailed.items():
-                                            print(f"{key}: {value}")
-                            print("="*50 + "\n")
-                        
-                        self.articles_processed += 1
-                        
-                        # Check if we've processed 5 articles
-                        if self.articles_processed % 5 == 0:
-                            print(f"\nProcessed {self.articles_processed} articles so far.")
-                            input("Press Enter to continue with the next set of articles...")
-                
-                self.processed_indices.update(new_indices)
+                        # Execute any resulting trades
+                        if trade_details:
+                            self.execute_trade(trade_details)
+                    
+                    self.processed_indices.update(new_indices)
             
         except Exception as e:
-            print(f"Error processing news indices: {e}")
+            print(f"Error processing news signals: {e}")
+
+    def execute_trade(self, trade_details: Dict):
+        """Execute a trade based on the provided details"""
+        if self.order:
+            return  # Already waiting for order to complete
+            
+        if trade_details['direction'] == 'BUY':
+            self.order = self.buy(size=trade_details['size'])
+            print(f"\nPlacing BUY order for {trade_details['size']} shares at {trade_details['price']}")
+        else:  # SELL
+            self.order = self.sell(size=trade_details['size'])
+            print(f"\nPlacing SELL order for {trade_details['size']} shares at {trade_details['price']}")
+
+    def get_metrics(self):
+        """Return current trading metrics"""
+        return self.trade_logic.get_metrics()
 
 def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
     """Run backtest with fixed data types"""
@@ -205,6 +205,12 @@ def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
     print(f"\nPreparing data for backtest using {model_choice} model...")
     prepared_data = prepare_backtest_data(price_data_df)
     
+    # Debug news data
+    print("\nChecking news data:")
+    print(f"Number of news items: {len(news_data)}")
+    print("Sample news item:", news_data[0] if news_data else "No news data")
+    
+
     # Create data feed without news_indices
     data_feed = PandasNewsData(
         dataname=prepared_data,
@@ -219,8 +225,7 @@ def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
         NewsStrategy,
         news_data=news_data,
         news_indices=prepared_data.attrs.get('news_indices'),
-        symbol=kwargs.get('symbol', 'NVDA'),
-        model_choice=model_choice
+        symbol=kwargs.get('symbol', 'NVDA')
     )
     
     # Set initial capital

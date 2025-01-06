@@ -40,25 +40,55 @@ class TradeLogic:
         
     def process_news_analysis(self, news_analysis: Dict, current_price: float, timestamp: str) -> Tuple[str, Optional[Dict]]:
         """Process news analysis and return trading decision"""
-        # Extract sentiment and confidence from news analysis
-        sentiment = news_analysis.get('sentiment', 0)  # -0.8 to 1.0 scale
-        confidence = news_analysis.get('confidence', 0)  # Impact score magnitude
-        impact = news_analysis.get('impact', 0)
-        
-        # Combined score for decision making
-        score = sentiment * confidence * impact
-        
-        # Determine position size based on confidence and current exposure
-        potential_position_size = self._calculate_position_size(score, current_price)
-        
-        # Strong signal threshold (may need tuning)
-        if abs(score) > 0.7:
-            if score > 0 and self._can_open_long(current_price, potential_position_size):
-                return self._open_long_position(current_price, potential_position_size, news_analysis, timestamp)
-            elif score < 0 and self._can_open_short(current_price, potential_position_size):
-                return self._open_short_position(current_price, potential_position_size, news_analysis, timestamp)
-                
-        return "HOLD", None
+        try:
+            # First check if we have detailed analysis
+            if not news_analysis.get('detailed_analysis'):
+                impact_score = news_analysis.get('impact_score', 0)
+                if impact_score < 6:
+                    print(f"\nNews impact score {impact_score} below threshold (6). No trade.")
+                    return "HOLD", None
+                else:
+                    print(f"\nMissing detailed analysis despite impact score {impact_score}")
+                    return "HOLD", None
+
+            # Extract sentiment and other scores from the nested structure
+            scores = news_analysis['detailed_analysis']['scores']
+            sentiment = scores['sentiment']
+            impact = scores['impact']
+            reliability = scores['reliability']
+
+            # Convert sentiment from 0-10 to -0.8 to 1.0 scale
+            scaled_sentiment = (sentiment - 5) * 0.2
+
+            # Use reliability as confidence (0-10 scale)
+            confidence = reliability / 10.0
+            
+            # Combined score for decision making
+            score = scaled_sentiment * confidence * (impact / 10.0)
+            
+            print(f"\nTrading Analysis:")
+            print(f"Raw Sentiment: {sentiment}/10")
+            print(f"Scaled Sentiment: {scaled_sentiment}")
+            print(f"Confidence: {confidence}")
+            print(f"Impact: {impact}/10")
+            print(f"Combined Score: {score}")
+            
+            # Determine position size based on confidence and current exposure
+            potential_position_size = self._calculate_position_size(score, current_price)
+            
+            # Strong signal threshold (may need tuning)
+            if abs(score) > 0.7:
+                if score > 0 and self._can_open_long(current_price, potential_position_size):
+                    return self._open_long_position(current_price, potential_position_size, news_analysis, timestamp)
+                elif score < 0 and self._can_open_short(current_price, potential_position_size):
+                    return self._open_short_position(current_price, potential_position_size, news_analysis, timestamp)
+                    
+            return "HOLD", None
+            
+        except Exception as e:
+            print(f"Error in process_news_analysis: {str(e)}")
+            print(f"News Analysis Object: {news_analysis}")
+            return "HOLD", None
 
     def update_positions(self, current_prices: Dict[str, float], timestamp: str) -> List[Dict]:
         """Update position states and check for closing conditions"""
