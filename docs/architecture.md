@@ -12,15 +12,15 @@ flowchart TD
         DB1[LiveDatabaseManager]
         DV1[LiveDataValidator]
         
-        NC --> NA
-        NA --> CB
-        CB --> CO
-        CO --> RTA
-        RTA --> TM
-        TM --> AG
-        AG --> NM
-        DB1 --> DV1
-        DV1 --> RTA
+        NC -->|""|NA
+        NA -->|""|CB
+        CB -->|""|CO
+        CO -->|""|RTA
+        RTA -->|""|TM
+        TM -->|""|AG
+        AG -->|""|NM
+        DB1 -->|""|DV1
+        DV1 -->|""|RTA
     end
 
     subgraph QAS["Quantitative Analysis System"]
@@ -35,11 +35,11 @@ flowchart TD
         QM[QuantModel]
         ST[StrategyTester]
         
-        HD --> DV2
-        DV2 --> DP
-        DP --> FA & TA & SA & ML & LA
-        FA & TA & SA & ML & LA --> QM
-        QM --> ST
+        HD -->|""|DV2
+        DV2 -->|""|DP
+        DP -->|""|FA & TA & SA & ML & LA
+        FA & TA & SA & ML & LA -->|""|QM
+        QM -->|""|ST
     end
 
     subgraph BTS["Backtesting System"]
@@ -48,14 +48,14 @@ flowchart TD
         OE[OptimizationEngine]
         SD[StrategyDeveloper]
         
-        ST --> BF
-        BF --> PA
-        PA --> OE
-        OE --> SD
+        ST -->|""|BF
+        BF -->|""|PA
+        PA -->|""|OE
+        OE -->|""|SD
     end
 
-    SD --> TM
-    QM --> RTA
+    SD -->|""|TM
+    QM -->|""|RTA
 
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
     classDef system fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000;
@@ -65,12 +65,9 @@ flowchart TD
     classDef notStarted fill:#f44336,stroke:#333,stroke-width:2px,color:#000;
     
     class RTS,QAS,BTS system;
-    
-    %% Finished components (Blue)
     class HD,DV2,DP finished;
-    
-    %% In Progress components (Green)
     class NC,NA,FA,TA,SA,LA,BF inProgress;
-    
-    %% Not Started components (Red)
     class CB,CO,RTA,TM,AG,NM,DB1,DV1,ML,QM,ST,PA,OE,SD notStarted;
+
+    linkStyle default stroke:#000,stroke-width:2px;
+```
