@@ -21,6 +21,7 @@ from DataValidator import DataValidator
 from DataPreprocessor import DataPreprocessor
 from newsAnalysisNew import NewsAnalysis
 from TradeLogic import TradeLogic
+from newsAnalysisNew import NewsAnalysis
 
 # Configure logging
 logging.basicConfig(
@@ -98,18 +99,30 @@ def prepare_backtest_data(df):
     return df
 
 class NewsStrategy(bt.Strategy):
-    params = (
-        ('news_data', None),          # Pre-analyzed news data
-        ('news_indices', None),       # News indices for time alignment
-        ('symbol', 'NVDA'),          
-        ('initial_cash', 100000.0),
-        ('max_position_size', 100),
-        ('max_exposure', 0.2),
-        ('trailing_stop_pct', 0.02),
-        ('max_drawdown_pct', 0.05)
+    params = dict(
+        news_data=None,          # Raw news data
+        news_indices=None,       # News indices for time alignment
+        symbol='NVDA',          
+        model_choice=None,       # Changed to dict format to ensure proper param passing
+        initial_cash=100000.0,
+        max_position_size=100,
+        max_exposure=0.2,
+        trailing_stop_pct=0.02,
+        max_drawdown_pct=0.05
     )
     
     def __init__(self):
+        # Debug prints for parameter values
+        print(f"\n[DEBUG] Strategy Initialization:")
+        print(f"    Model Choice: {self.p.model_choice}")
+        
+        # Store parameters as instance variables
+        self.model_choice = self.p.model_choice
+        if self.model_choice is None:
+            raise ValueError("model_choice parameter not properly passed to strategy")
+            
+        self.symbol = self.p.symbol
+        
         # Initialize TradeLogic
         self.trade_logic = TradeLogic(
             initial_capital=self.p.initial_cash,
@@ -123,7 +136,13 @@ class NewsStrategy(bt.Strategy):
         self.current_bar = 0
         self.news_indices = self.p.news_indices
         self.processed_indices = set()
-    
+
+        # Initialize news analyzer
+        self.news_analyzer = NewsAnalysis(
+            symbol=self.symbol,
+            model_choice=self.model_choice
+        )
+        
     def next(self):
         # First update any existing positions
         if self.trade_logic.open_positions:
@@ -152,19 +171,31 @@ class NewsStrategy(bt.Strategy):
             new_indices = set(indices) - self.processed_indices
             
             if new_indices:
+                # Initialize news analyzer
+                
+                news_analyzer = NewsAnalysis(symbol=self.p.symbol, model_choice=self.p.model_choice)
+                
                 for idx in new_indices:
                     if idx < len(self.p.news_data):
-                        # Get pre-analyzed news data
-                        analysis = self.p.news_data[idx]
+                        # Get raw news data
+                        news_item = self.p.news_data[idx]
                         
                         print("\n" + "="*50)
                         print("Processing News Article:")
                         print(f"Index: {idx}")
-                        print(f"Raw News Data: {self.p.news_data[idx]}")  # Added this line
-                        print(f"Initial Analysis: {analysis.get('initial_analysis', 'No initial analysis')}")
-                        print(f"Impact Score: {analysis.get('impact_score', 0)}")
-                        print(f"Has Detailed Analysis: {'Yes' if analysis.get('detailed_analysis') else 'No'}")
-                        print("="*50 + "\n")
+                        
+                        # Analyze news in real-time
+                        try:
+                            loop = asyncio.get_event_loop()
+                        except RuntimeError:
+                            loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(loop)
+                            
+                        analysis = loop.run_until_complete(
+                            news_analyzer.analyze_news(news_item)
+                        )
+                        
+                        print(f"Analysis completed: {analysis}")
                         
                         # Get trading decision from TradeLogic
                         action, trade_details = self.trade_logic.process_news_analysis(
@@ -178,7 +209,7 @@ class NewsStrategy(bt.Strategy):
                             self.execute_trade(trade_details)
                     
                     self.processed_indices.update(new_indices)
-            
+                
         except Exception as e:
             print(f"Error processing news signals: {e}")
 
@@ -198,20 +229,15 @@ class NewsStrategy(bt.Strategy):
         """Return current trading metrics"""
         return self.trade_logic.get_metrics()
 
-def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
-    """Run backtest with fixed data types"""
+def run_backtest(price_data_df, news_data, model_choice, **kwargs):
+    print(f"[DEBUG] run_backtest params:")
+    print(f"    model_choice type: {type(model_choice)}")
+    print(f"    model_choice value: {model_choice}")
+    
     cerebro = bt.Cerebro()
     
-    print(f"\nPreparing data for backtest using {model_choice} model...")
     prepared_data = prepare_backtest_data(price_data_df)
     
-    # Debug news data
-    print("\nChecking news data:")
-    print(f"Number of news items: {len(news_data)}")
-    print("Sample news item:", news_data[0] if news_data else "No news data")
-    
-
-    # Create data feed without news_indices
     data_feed = PandasNewsData(
         dataname=prepared_data,
         fromdate=prepared_data.index.min(),
@@ -220,13 +246,19 @@ def run_backtest(price_data_df, news_data, model_choice='gpt', **kwargs):
     
     cerebro.adddata(data_feed)
     
-    # Initialize strategy with both the news data and indices
-    cerebro.addstrategy(
-        NewsStrategy,
-        news_data=news_data,
-        news_indices=prepared_data.attrs.get('news_indices'),
-        symbol=kwargs.get('symbol', 'NVDA')
-    )
+    # Try passing model_choice directly in params dict
+    strategy_params = {
+        'news_data': news_data,
+        'news_indices': prepared_data.attrs.get('news_indices'),
+        'symbol': kwargs.get('symbol', 'NVDA'),
+        'model_choice': model_choice,
+        'initial_cash': kwargs.get('initial_cash', 100000.0)
+    }
+    
+    #print(f"[DEBUG] Strategy params before adding to cerebro:")
+    #print(f"    {strategy_params}")
+    
+    cerebro.addstrategy(NewsStrategy, **strategy_params)
     
     # Set initial capital
     cerebro.broker.setcash(kwargs.get('initial_cash', 100000.0))

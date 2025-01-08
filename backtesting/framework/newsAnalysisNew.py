@@ -54,6 +54,7 @@ class NewsAnalysis:
         """Make API call to selected AI model"""
         try:
             if self.model_choice == "gpt":
+                # GPT-4 has 200 requests/min, GPT-3.5 has 3500 requests/min
                 model = "gpt-4-turbo-preview" if detailed else "gpt-3.5-turbo"
                 data = {
                     "model": model,
@@ -61,42 +62,74 @@ class NewsAnalysis:
                     "max_tokens": 4096 if detailed else 500,
                     "temperature": 0.5
                 }
+                
                 response = requests.post(
                     "https://api.openai.com/v1/chat/completions",
                     headers=self.openai_headers,
                     json=data
                 )
+                
+                if response.status_code == 429:
+                    print("\nGPT: Hit rate limit, waiting 20 seconds...")
+                    await asyncio.sleep(20)
+                    response = requests.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers=self.openai_headers,
+                        json=data
+                    )
+                
+                await asyncio.sleep(0.5 if model == "gpt-4-turbo-preview" else 0.2)  # Delay based on model
                 response.raise_for_status()
                 return response.json()['choices'][0]['message']['content']
                 
             elif self.model_choice == "gemini":
-                response = await self.gemini_model.generate_content_async(prompt)
-                return response.text
+                # Gemini free tier: 60 requests/min
+                try:
+                    response = await self.gemini_model.generate_content_async(prompt)
+                    await asyncio.sleep(1)  # 1 second delay for free tier
+                    return response.text
+                except Exception as e:
+                    if "429" in str(e):
+                        print("\nGemini: Hit rate limit, waiting 20 seconds...")
+                        await asyncio.sleep(20)
+                        response = await self.gemini_model.generate_content_async(prompt)
+                        await asyncio.sleep(1)
+                        return response.text
+                    raise e
                 
             elif self.model_choice == "claude":
-                response = self.claude_client.messages.create(
-                    model="claude-3-opus-20240229",
-                    max_tokens=4096 if detailed else 500,
-                    temperature=0.5,
-                    messages=[{
-                        "role": "user",
-                        "content": prompt
-                    }]
-                )
-                return response.content[0].text
+                # Claude-3: 100 requests/min (verify this for your tier)
+                try:
+                    response = self.claude_client.messages.create(
+                        model="claude-3-opus-20240229",
+                        max_tokens=4096 if detailed else 500,
+                        temperature=0.5,
+                        messages=[{
+                            "role": "user",
+                            "content": prompt
+                        }]
+                    )
+                    await asyncio.sleep(0.7)  # 0.7 second delay to stay under 100 rpm
+                    return response.content[0].text
+                except Exception as e:
+                    if "429" in str(e):
+                        print("\nClaude: Hit rate limit, waiting 20 seconds...")
+                        await asyncio.sleep(20)
+                        response = self.claude_client.messages.create(
+                            model="claude-3-opus-20240229",
+                            max_tokens=4096 if detailed else 500,
+                            temperature=0.5,
+                            messages=[{
+                                "role": "user",
+                                "content": prompt
+                            }]
+                        )
+                        await asyncio.sleep(0.7)
+                        return response.content[0].text
+                    raise e
                 
             elif self.model_choice == "together":
-                # Available Models:
-                # - "togethercomputer/llama-2-70b-chat"  # Requires dedicated endpoint
-                # - "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Good for complex reasoning
-                # - "meta-llama/Llama-2-70b-chat-hf"  # Requires dedicated endpoint
-                # - "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"  # Good for instructions
-                # - "WizardLM/WizardLM-70B-V2"  # Requires dedicated endpoint
-                # - "google/gemma-7b-it"  # New Google model
-                # - "anthropic/claude-3-sonnet"  # Requires different API
-                # - "tiiuae/falcon-180B"  # Requires dedicated endpoint
-                # - "01-ai/Yi-34B-Chat"  # Good performance/cost ratio
-
+                # Together AI: Variable based on model, using conservative delay
                 formatted_prompt = f"""<s>[INST] {prompt} [/INST]</s>"""
                 try:
                     response = together.Complete.create(
@@ -109,12 +142,12 @@ class NewsAnalysis:
                         repetition_penalty=1.1
                     )
                     
-                    # Check if response and choices exist
+                    await asyncio.sleep(0.5)  # 0.5 second default delay
+                    
                     if not response or 'choices' not in response:
                         print("No valid response or choices from Together API")
                         return None
                         
-                    # Get text directly from choices
                     if response['choices'] and 'text' in response['choices'][0]:
                         return response['choices'][0]['text']
                     else:
@@ -122,7 +155,21 @@ class NewsAnalysis:
                         return None
                         
                 except Exception as e:
-                    print(f"Together API specific error: {str(e)}")
+                    if "429" in str(e):
+                        print("\nTogether: Hit rate limit, waiting 20 seconds...")
+                        await asyncio.sleep(20)
+                        response = together.Complete.create(
+                            prompt=formatted_prompt,
+                            model="mistralai/Mistral-7B-Instruct-v0.2",
+                            max_tokens=4096 if detailed else 500,
+                            temperature=0.5,
+                            top_p=0.7,
+                            top_k=50,
+                            repetition_penalty=1.1
+                        )
+                        await asyncio.sleep(0.5)
+                        if response['choices'] and 'text' in response['choices'][0]:
+                            return response['choices'][0]['text']
                     return None
                 
         except Exception as e:
