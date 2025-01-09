@@ -1,0 +1,39 @@
+{
+    "article": {
+        "date": "2025-01-09T15:14:00+00:00",
+        "title": "AI Chip Curbs Trigger Rare Public Fight: Tech Giants vs. China Hawks",
+        "content": "Behind the clash is a new Biden administration effort to block China\u2019s access to sensitive technologies.\n\nContinue reading\n\nView comments",
+        "link": "https://finance.yahoo.com/m/bff3eb1a-efb7-3d3b-9d48-50816651172b/ai-chip-curbs-trigger-rare.html",
+        "symbols": [
+            "0QYP.IL",
+            "0R1O.IL",
+            "1AMZN.MI",
+            "1MSFT.MI",
+            "1NVDA.MI",
+            "AMZ.DU",
+            "AMZ.F",
+            "AMZ.HM",
+            "AMZ.MU",
+            "AMZ.STU",
+            "AMZ.XETRA",
+            "AMZ1.F",
+            "AMZN.BA",
+            "AMZN.MX",
+            "AMZN.NEO",
+            "AMZN.SN",
+            "AMZN.US",
+            "AMZO34.SA",
+            "MSF.BE",
+            "MSF.DU"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": -0.44,
+            "neg": 0.139,
+            "neu": 0.861,
+            "pos": 0
+        }
+    },
+    "step1_result": "The article does not directly relate to Nvidia stocks (NVDA).  It discusses the Biden administration's efforts to block China's access to sensitive technologies. While this could indirectly impact Nvidia if they are involved in producing or selling such technologies to China, the connection isn't explicit.\n\n**Non-related tag.** Brief mention of relevance: Potential indirect impact due to US-China tech restrictions.\n",
+    "detailed_result": null
+}
