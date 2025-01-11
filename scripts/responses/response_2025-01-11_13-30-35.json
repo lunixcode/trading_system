@@ -1,0 +1,20 @@
+{
+    "article": {
+        "date": "2025-01-10T00:00:00+00:00",
+        "title": "Prediction: This AI Company Will Be the Most Valuable in the World by the End of 2025",
+        "content": "Prediction: This AI Company Will Be the Most Valuable in the World by the End of 2025",
+        "link": "https://www.fool.com/investing/2025/01/10/prediction-this-ai-company-will-be-the-largest-sto/",
+        "symbols": [
+            "NVDA.US"
+        ],
+        "tags": [],
+        "sentiment": {
+            "polarity": 0.521,
+            "neg": 0,
+            "neu": 0.826,
+            "pos": 0.174
+        }
+    },
+    "step1_result": "Primary check:  The article title hints at AI and potentially relates to Nvidia due to its prominence in the AI field. However, without the article body, direct NVDA stock relevance is unclear.  `non-related`\n\nBrief mention of relevance:  The mention of \"AI company\" could indirectly impact Nvidia as a major player in the AI industry, but direct relevance to NVDA stock is missing from the title alone.\n",
+    "detailed_result": null
+}

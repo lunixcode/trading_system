@@ -27,9 +27,13 @@ STEP2_MODEL = genai.GenerativeModel("gemini-2.0-flash-exp")
 NEWS_URL = "https://eodhistoricaldata.com/api/news"
 COMPANIES = ["NVDA.US"]
 
-# Ensure the responses directory exists
-RESPONSES_DIR = Path("responses")
-RESPONSES_DIR.mkdir(exist_ok=True)
+
+
+# Define the responses directory
+RESPONSES_DIR = Path(__file__).parent / "responses"
+
+# Ensure the 'responses' folder exists
+RESPONSES_DIR.mkdir(exist_ok=True)  # This creates the folder if it doesn't exist.
 
 async def call_gemini(model, prompt, delay=1):
     """
@@ -67,15 +71,18 @@ async def save_response(article, step1_result, detailed_result=None):
     """
     Save the analysis results to a JSON file.
     """
+    # Generate a timestamp for the file name
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     file_name = RESPONSES_DIR / f"response_{timestamp}.json"
 
+    # Prepare the data to save
     data = {
         "article": article,
         "step1_result": step1_result,
         "detailed_result": detailed_result
     }
 
+    # Save the data to the JSON file
     with open(file_name, "w") as f:
         json.dump(data, f, indent=4)
 
