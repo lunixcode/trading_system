@@ -1,4 +1,9 @@
 # test_market_sentiment.py
+import os
+import sys
+# Set sys.path to include the 'framework' directory explicitly
+framework_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(framework_path)
 import asyncio
 import json
 from datetime import datetime
