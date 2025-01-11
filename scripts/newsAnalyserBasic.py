@@ -82,8 +82,8 @@ async def call_detailed_analysis(content, combined_summary):
     - Assess sentiment (0-10).
     - Asses relevancy (0-10)
     - Evaluate reliability of source (0-10).
-    - Provide risk assessment (1-10).
-    - Assign an impact score between (1-10).
+    - Provide risk assessment (0-10).
+    - Assign an impact score between (0-10).
     - Suggest a short-term investment strategy (hours to days).
     - If the combined values of the of the top 5 categories equal or above 40 create an action plan for immediate action with a review period (Buy, Sell, Hold etc)
     
