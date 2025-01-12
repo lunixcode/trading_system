@@ -164,27 +164,45 @@ class StatisticalAnalyzer:
         
         return news_items
 
+import os
+import requests
+import json
+import pandas as pd
+from typing import Dict
+
+import os
+import requests
+import json
+import pandas as pd
+from typing import Dict
+
+import os
+import requests
+import json
+import pandas as pd
+from typing import Dict
+
 class LLMAnalyzer:
     """Class to handle LLM-based news analysis using DeepSeek."""
-    
+
     def __init__(self):
+        # Load API key from environment variables
         self.api_key = os.getenv('DEEPSEEK_API_KEY')
         if not self.api_key:
             raise ValueError("DEEPSEEK_API_KEY not found in environment variables")
-        
-        # Use the correct DeepSeek endpoint
-        self.api_url = "https://api.deepseek.com/v1/chat/completions"
+
+        # Set the correct DeepSeek API URL
+        self.api_url = "https://api.deepseek.com/chat/completions"
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
-        self.debug = True  # Always show debug info for API calls
-        
-    def analyze(self, analysis: dict) -> dict:
-        """Analyze news context using DeepSeek v3."""
-        # Prepare consolidated news content
-        news_content = self._prepare_consolidated_news(analysis)
-        
+        self.debug = True  # Enable debug mode for detailed logging
+
+    def analyze(self, analysis: Dict) -> Dict:
+        """Analyze news context using DeepSeek LLM."""
+        model_name = "deepseek-chat"
+
         prompt = f"""You are a financial analyst specializing in identifying causal relationships between news events and stock price movements. Analyze the following scenario:
 
 Stock Movement:
@@ -192,8 +210,6 @@ Stock Movement:
 - Price Change: {analysis['percentage_change']:.2f}% ({analysis['move_direction']})
 - Absolute Change: ${analysis['absolute_change']:.2f}
 - Trading Volume: {analysis['volume']}
-
-{news_content}
 
 Analyze this situation and provide:
 1. The most impactful news article(s) and why they were significant
@@ -207,9 +223,9 @@ Format your response as a JSON object with the following fields:
 - causation_likelihood: String (high/medium/low)
 - explanation: String
 """
-        
+
         request_data = {
-            "model": "deepseek-33b-chat",
+            "model": model_name,
             "messages": [
                 {"role": "system", "content": "You are a financial analyst expert at analyzing news impact on stock prices."},
                 {"role": "user", "content": prompt}
@@ -220,89 +236,82 @@ Format your response as a JSON object with the following fields:
             "stream": False
         }
 
-        # Print only essential request details
-        print("\n=== API Request Details ===")
-        print(f"Endpoint: {self.api_url}")
-        print(f"Model: {request_data['model']}")
-        print(f"Total news articles: {len(analysis.get('news_during_move', [])) + len(analysis.get('news_before_move', []))}")
-        
+        if self.debug:
+            print("\n=== API Request Details ===")
+            print(f"Endpoint: {self.api_url}")
+            print(f"Model: {request_data['model']}")
+            print("Prompt: Truncated for readability")
+
         try:
             response = requests.post(
                 self.api_url,
                 headers=self.headers,
                 json=request_data
             )
-            
-            print("\n=== API Response ===")
-            print(f"Status Code: {response.status_code}")
-            
+
+            if self.debug:
+                print("\n=== API Response ===")
+                print(f"Status Code: {response.status_code}")
+
             response.raise_for_status()
-            
-            response.raise_for_status()
-            
+
             # Parse the response
             llm_response = response.json()
-            content = llm_response['choices'][0]['message']['content']
-            
-            # Parse the JSON response
-            try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                print("\nFailed to parse LLM response as JSON:")
-                print(content)
+
+            if "choices" in llm_response and len(llm_response["choices"]) > 0:
+                content = llm_response["choices"][0]["message"]["content"].strip()
+                if self.debug:
+                    print(f"Raw Content: {content}")
+
+                # Handle stringified JSON
+                if content.startswith("{") and content.endswith("}"):
+                    try:
+                        parsed_response = json.loads(content)
+                        return parsed_response
+                    except json.JSONDecodeError as e:
+                        print("\nFailed to parse LLM response as JSON:")
+                        print(f"Error: {e}")
+                        return {
+                            "key_articles": [],
+                            "common_themes": [],
+                            "causation_likelihood": "unknown",
+                            "explanation": "Error parsing LLM response",
+                            "raw_response": content
+                        }
+                else:
+                    print("\nUnexpected content format:")
+                    print(content)
+                    return {
+                        "key_articles": [],
+                        "common_themes": [],
+                        "causation_likelihood": "unknown",
+                        "explanation": "Unexpected content format",
+                        "raw_response": content
+                    }
+            else:
+                print("\nUnexpected response format from API:")
+                print(llm_response)
                 return {
                     "key_articles": [],
                     "common_themes": [],
                     "causation_likelihood": "unknown",
-                    "explanation": "Error parsing LLM response",
-                    "raw_response": content
+                    "explanation": "Unexpected response format",
+                    "raw_response": llm_response
                 }
-            
-        except Exception as e:
+
+        except requests.exceptions.HTTPError as e:
             print(f"\nError in LLM analysis: {str(e)}")
-            if isinstance(e, requests.exceptions.HTTPError):
-                print(f"Response content: {e.response.content if hasattr(e, 'response') else 'No response content'}")
+            if e.response:
+                print(f"Response content: {e.response.content}")
             return {
                 "key_articles": [],
                 "common_themes": [],
                 "causation_likelihood": "unknown",
-                "explanation": f"Error during analysis: {str(e)}"
+                "explanation": f"HTTP Error: {e.response.content if e.response else str(e)}"
             }
-            
-    def _prepare_consolidated_news(self, analysis: dict) -> str:
-        """Consolidate news articles into a chronological narrative."""
-        all_news = []
-        
-        # Combine all news with their temporal relationship
-        for news in analysis.get('news_before_move', []):
-            all_news.append({
-                'date': pd.to_datetime(news['date']),
-                'title': news['title'],
-                'content': news.get('content', ''),
-                'timing': 'before'
-            })
-            
-        for news in analysis.get('news_during_move', []):
-            all_news.append({
-                'date': pd.to_datetime(news['date']),
-                'title': news['title'],
-                'content': news.get('content', ''),
-                'timing': 'during'
-            })
-            
-        # Sort by date
-        all_news.sort(key=lambda x: x['date'])
-        
-        # Create consolidated text
-        news_text = "News Timeline:\n\n"
-        for news in all_news:
-            timing_marker = "[DURING MOVE]" if news['timing'] == 'during' else "[BEFORE MOVE]"
-            news_text += f"{timing_marker} {news['date']}: {news['title']}\n"
-            if news['content']:
-                news_text += f"Content: {news['content']}\n"
-            news_text += "\n"
-            
-        return news_text
+
+
+
 
 def main():
     """Example usage of the StatisticalAnalyzer"""
