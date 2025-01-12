@@ -10,21 +10,17 @@ C:.
 
 ¦   README.md
 
+¦   TODO.md
+
 ¦   
 
 +---backtesting
 
 ¦   +---framework
 
-¦   ¦   ¦   azdataExample.py
-
 ¦   ¦   ¦   backtester.py
 
 ¦   ¦   ¦   DataPreprocessor.py
-
-¦   ¦   ¦   DataProcessing.py
-
-¦   ¦   ¦   datapullTest.py
 
 ¦   ¦   ¦   DataValidator.py
 
@@ -38,19 +34,29 @@ C:.
 
 ¦   ¦   ¦   optimizer.py
 
-¦   ¦   ¦   testMarketSentiment.py
-
-¦   ¦   ¦   testscriptdatarange.py
-
-¦   ¦   ¦   test_historical_data.py
-
-¦   ¦   ¦   timefiltercheckscript.py
-
 ¦   ¦   ¦   TradeLogic.py
 
 ¦   ¦   ¦   __init__.py
 
 ¦   ¦   ¦   
+
+¦   ¦   +---testScripts
+
+¦   ¦   ¦       azdataExample.py
+
+¦   ¦   ¦       DataProcessing.py
+
+¦   ¦   ¦       datapullTest.py
+
+¦   ¦   ¦       testMarketSentiment.py
+
+¦   ¦   ¦       testscriptdatarange.py
+
+¦   ¦   ¦       test_historical_data.py
+
+¦   ¦   ¦       timefiltercheckscript.py
+
+¦   ¦   ¦       
 
 ¦   ¦   +---__pycache__
 
@@ -68,6 +74,8 @@ C:.
 
 ¦   ¦           TradeLogic.cpython-310.pyc
 
+¦   ¦           __init__.cpython-310.pyc
+
 ¦   ¦           
 
 ¦   +---strategy
@@ -77,6 +85,26 @@ C:.
 ¦           __init__.py
 
 ¦           
+
++---cache
+
+¦   +---NVDA
+
+¦       +---2024
+
+¦               aligned_15min.pkl
+
+¦               aligned_1d.pkl
+
+¦               aligned_1h.pkl
+
+¦               aligned_30min.pkl
+
+¦               aligned_5min.pkl
+
+¦               news_data.pkl
+
+¦               
 
 +---config
 
@@ -240,6 +268,8 @@ C:.
 
 ¦       architecture.md
 
+¦       HistoricalDataManagement.md
+
 ¦       progress_tracker.md
 
 ¦       
@@ -254,7 +284,11 @@ C:.
 
 ¦   ¦       statistical.py
 
+¦   ¦       StatisticalAnalyzer.py
+
 ¦   ¦       technical.py
+
+¦   ¦       test.py
 
 ¦   ¦       __init__.py
 

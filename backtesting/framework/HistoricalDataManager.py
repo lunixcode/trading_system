@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 from datetime import datetime
 
+
 class HistoricalDataManager:
     def __init__(self, base_path: str = "data", debug: bool = False):
         self.debug = debug
@@ -15,20 +16,48 @@ class HistoricalDataManager:
         self.news_path = self.base_path / "news" / "raw"
         self.fundamentals_path = self.base_path / "fundamentals"
         
-        if self.debug:
-            print(f"Checking paths:")
-            print(f"Price path exists: {self.price_path.exists()}")
-            print(f"News path exists: {self.news_path.exists()}")
-            print(f"Fundamentals path exists: {self.fundamentals_path.exists()}")
-        
         self._price_cache: Dict[str, pd.DataFrame] = {}
         self._news_cache: Dict[str, List[dict]] = {}
         self._fundamentals_cache: Dict[str, dict] = {}
+        
+        # Add cache metadata
+        self._cache_metadata = {
+            'price': {},  # symbol -> {'start_date', 'end_date'}
+            'news': {}    # symbol -> {'start_date', 'end_date'}
+        }
+
+    def _is_cache_valid(self, symbol: str, start_date: datetime, end_date: datetime, data_type: str) -> bool:
+        """Check if cached data covers the requested date range."""
+        if symbol not in self._cache_metadata[data_type]:
+            return False
+        
+        metadata = self._cache_metadata[data_type][symbol]
+        return (metadata['start_date'] <= start_date and 
+                metadata['end_date'] >= end_date)
+
+    def _update_cache_metadata(self, symbol: str, start_date: datetime, end_date: datetime, data_type: str):
+        """Update cache metadata for symbol."""
+        self._cache_metadata[data_type][symbol] = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
 
     def get_price_data(self, symbol: str, start_date: datetime, end_date: datetime) -> pd.DataFrame:
         """Load price data for a given symbol and date range."""
         if self.debug:
             print(f"Loading price data for {symbol} from {start_date} to {end_date}")
+        
+        # Check cache validity first
+        if self._is_cache_valid(symbol, start_date, end_date, 'price'):
+            cache_key = f"{symbol}_{start_date.year}"
+            if cache_key in self._price_cache:
+                if self.debug:
+                    print("Using cached price data without reprocessing")
+                mask = (self._price_cache[cache_key]['Date'] >= start_date) & (self._price_cache[cache_key]['Date'] <= end_date)
+                result = self._price_cache[cache_key][mask].copy()
+                if self.debug:
+                    print(f"Returning {len(result)} rows of cached price data")
+                return result
         
         cache_key = f"{symbol}_{start_date.year}"
         if self.debug:
@@ -83,6 +112,7 @@ class HistoricalDataManager:
                 raise FileNotFoundError(f"No price data found for {symbol} in specified date range")
             
             self._price_cache[cache_key] = pd.concat(dfs, ignore_index=True)
+            self._update_cache_metadata(symbol, start_date, end_date, 'price')
             if self.debug:
                 print(f"Cached {len(self._price_cache[cache_key])} rows of price data for {cache_key}")
         else:
@@ -99,6 +129,20 @@ class HistoricalDataManager:
         """Load news data for a given symbol and date range."""
         if self.debug:
             print(f"Loading news data for {symbol} from {start_date} to {end_date}")
+        
+        # Check cache validity first
+        if self._is_cache_valid(symbol, start_date, end_date, 'news'):
+            cache_key = f"{symbol}_{start_date.year}"
+            if cache_key in self._news_cache:
+                if self.debug:
+                    print("Using cached news data without reprocessing")
+                filtered_news = [
+                    item for item in self._news_cache[cache_key]
+                    if start_date <= datetime.fromisoformat(item['date']).replace(tzinfo=None) <= end_date
+                ]
+                if self.debug:
+                    print(f"Returning {len(filtered_news)} cached news items")
+                return filtered_news
         
         news_items = []
         current_date = start_date
@@ -151,35 +195,14 @@ class HistoricalDataManager:
             if current_date.month == 1:
                 current_date = current_date.replace(year=current_date.year + 1)
         
+        # Update cache with new data
+        cache_key = f"{symbol}_{start_date.year}"
+        self._news_cache[cache_key] = news_items
+        self._update_cache_metadata(symbol, start_date, end_date, 'news')
+        
         if self.debug:
             print(f"Returning {len(news_items)} news items")
             if news_items:
                 print("Sample of first news item date:", news_items[0]['date'])
         
         return news_items
-
-    def clear_cache(self, data_type: Optional[str] = None):
-        """Clear the data cache."""
-        if self.debug:
-            print(f"Clearing cache for data_type: {data_type if data_type else 'all'}")
-        
-        if data_type is None:
-            self._price_cache.clear()
-            self._news_cache.clear()
-            self._fundamentals_cache.clear()
-            if self.debug:
-                print("Cleared all caches")
-        elif data_type == 'price':
-            self._price_cache.clear()
-            if self.debug:
-                print("Cleared price cache")
-        elif data_type == 'news':
-            self._news_cache.clear()
-            if self.debug:
-                print("Cleared news cache")
-        elif data_type == 'fundamentals':
-            self._fundamentals_cache.clear()
-            if self.debug:
-                print("Cleared fundamentals cache")
-        else:
-            raise ValueError("Invalid data_type. Must be 'price', 'news', 'fundamentals', or None")

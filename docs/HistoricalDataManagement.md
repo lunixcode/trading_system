@@ -1,3 +1,4 @@
+mermaid'''
 flowchart TD
     subgraph HistoricalDataManager ["HistoricalDataManager Class"]
         init["__init__(base_path: str = 'data', debug: bool = False)"]
