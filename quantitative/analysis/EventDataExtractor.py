@@ -1,12 +1,12 @@
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
-
-# Type hints imports
-if TYPE_CHECKING:
-    from backtesting.framework.DataPreprocessor import DataPreprocessor
 from datetime import datetime, timedelta
 import pandas as pd
 from pathlib import Path
 import json
+
+# Type hints imports
+if TYPE_CHECKING:
+    from backtesting.framework.DataPreprocessor import DataPreprocessor
 
 class EventDataExtractor:
     """
@@ -18,15 +18,7 @@ class EventDataExtractor:
                  lookback_days: int = 7,
                  lookforward_days: int = 7,
                  debug: bool = False):
-        """
-        Initialize the EventDataExtractor.
-        
-        Args:
-            aligned_dir: Directory for saving aligned data
-            lookback_days: Days to look back before event
-            lookforward_days: Days to look forward after event
-            debug: Enable debug logging
-        """
+        """Initialize the EventDataExtractor."""
         self.debug = debug
         self.aligned_dir = Path(aligned_dir)
         self.lookback_days = lookback_days
@@ -39,15 +31,26 @@ class EventDataExtractor:
             print(f"Initialized EventDataExtractor")
             print(f"Aligned data directory: {self.aligned_dir}")
     
-    def _get_aligned_path(self, symbol: str, event_date: datetime) -> Path:
-        """Get the directory path for saving aligned event data."""
-        date_str = event_date.strftime('%Y%m%d')
-        return self.aligned_dir / symbol / date_str
+    def _get_aligned_paths(self, symbol: str, event_number: int) -> Tuple[Path, Path]:
+        """Get the paths for saving aligned data and metadata."""
+        # Create 5min and metadata directories
+        data_dir = self.aligned_dir / symbol / "5min"
+        meta_dir = data_dir / "metadata"
+        
+        # Create directories if they don't exist
+        data_dir.mkdir(parents=True, exist_ok=True)
+        meta_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Return paths for data and metadata files
+        data_path = data_dir / f"{event_number}.parquet"
+        meta_path = meta_dir / f"{event_number}.json"
+        
+        return data_path, meta_path
     
     def extract_event_data(self,
                           event_date: datetime,
                           symbol: str,
-                          preprocessor: 'DataPreprocessor'): # type: ignore) -> Tuple[pd.DataFrame, Dict]:
+                          preprocessor: 'DataPreprocessor') -> Tuple[pd.DataFrame, Dict]:
         """
         Extract 2-week period data around an event.
         
@@ -59,7 +62,6 @@ class EventDataExtractor:
         Returns:
             Tuple of (event_period_data, event_details)
         """
-
         if self.debug:
             print(f"\nExtracting event data for {symbol} on {event_date}")
         
@@ -103,61 +105,36 @@ class EventDataExtractor:
                        period_data: pd.DataFrame,
                        event_details: Dict,
                        symbol: str,
-                       event_date: datetime) -> Path:
-        """
-        Save event period data to aligned data directory.
-        
-        Args:
-            period_data: DataFrame containing the event period data
-            event_details: Dictionary with event metadata
-            symbol: Stock symbol
-            event_date: Event date
-            
-        Returns:
-            Path to saved data directory
-        """
-        # Get save location
-        save_dir = self._get_aligned_path(symbol, event_date)
-        save_dir.mkdir(parents=True, exist_ok=True)
-        
+                       event_number: int) -> Path:
+        """Save event period data and metadata."""
         try:
+            # Get save paths
+            data_file, meta_file = self._get_aligned_paths(symbol, event_number)
+            
             # Save aligned data
-            data_file = save_dir / 'aligned_5min.parquet'
             period_data.to_parquet(data_file)
             
             # Save metadata
-            meta_file = save_dir / 'metadata.json'
             with open(meta_file, 'w') as f:
                 json.dump(event_details, f, indent=2, default=str)
             
             if self.debug:
-                print(f"\nSaved event data:")
-                print(f"Data file: {data_file}")
-                print(f"Metadata: {meta_file}")
-                print(f"Records: {len(period_data)}")
+                print(f"Event {event_number} data saved to: {data_file}")
+                print(f"Metadata saved to: {meta_file}")
             
-            return save_dir
+            return data_file.parent  # Return the 5min directory
             
         except Exception as e:
             if self.debug:
                 print(f"Error saving event data: {str(e)}")
             raise
-    
+
     def extract_and_save_event(self,
                              event_date: datetime,
                              symbol: str,
-                             preprocessor: 'DataPreprocessor') -> Path:
-        """
-        Extract and save event data in one operation.
-        
-        Args:
-            event_date: Date of the event
-            symbol: Stock symbol
-            preprocessor: DataPreprocessor instance
-            
-        Returns:
-            Path to saved data directory
-        """
+                             preprocessor: 'DataPreprocessor',
+                             event_number: int) -> Path:
+        """Extract and save event data in one operation."""
         # Extract data
         period_data, event_details = self.extract_event_data(
             event_date,
@@ -165,43 +142,15 @@ class EventDataExtractor:
             preprocessor
         )
         
-        # Save data
-        return self.save_event_data(
+        # Add event number to details
+        event_details['event_number'] = event_number
+        
+        # Save data with numbered files
+        save_path = self.save_event_data(
             period_data,
             event_details,
             symbol,
-            event_date
+            event_number
         )
-    
-    def extract_multiple_events(self,
-                              events: List[datetime],
-                              symbol: str,
-                              preprocessor: 'DataPreprocessor') -> List[Path]:
-        """
-        Extract and save data for multiple events.
         
-        Args:
-            events: List of event dates
-            symbol: Stock symbol
-            preprocessor: DataPreprocessor instance
-            
-        Returns:
-            List of paths to saved data directories
-        """
-        saved_paths = []
-        
-        for event_date in events:
-            try:
-                save_path = self.extract_and_save_event(
-                    event_date,
-                    symbol,
-                    preprocessor
-                )
-                saved_paths.append(save_path)
-                
-            except Exception as e:
-                if self.debug:
-                    print(f"Error processing event {event_date}: {str(e)}")
-                continue
-        
-        return saved_paths
+        return save_path

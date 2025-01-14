@@ -1,148 +1,118 @@
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
-from datetime import datetime, timedelta
-import pandas as pd
+#!/usr/bin/env python3
+
+import os
+import sys
+from datetime import datetime
 from pathlib import Path
-import json
 
-# Type hints imports
-if TYPE_CHECKING:
-    from backtesting.framework.DataPreprocessor import DataPreprocessor
+# Add project root to path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, "../.."))
+sys.path.append(project_root)
 
-class EventDataExtractor:
-    """
-    Extracts and saves 2-week periods of aligned data around significant market events.
-    """
+# Import components
+from backtesting.framework.HistoricalDataManager import HistoricalDataManager
+from backtesting.framework.DataValidator import DataValidator
+from backtesting.framework.DataPreprocessor import DataPreprocessor
+from quantitative.analysis.StatisticalAnalyzer import StatisticalAnalyzer
+from quantitative.analysis.EventDataExtractor import EventDataExtractor
+
+def find_significant_moves(symbol: str, start_date: datetime, end_date: datetime, debug: bool = True):
+    """Find significant price moves in the data."""
+    print(f"\nFinding significant moves for {symbol}")
+    print(f"Period: {start_date} to {end_date}")
     
-    def __init__(self, 
-                 aligned_dir: str = "data/aligned/2week",
-                 lookback_days: int = 7,
-                 lookforward_days: int = 7,
-                 debug: bool = False):
-        """Initialize the EventDataExtractor."""
-        self.debug = debug
-        self.aligned_dir = Path(aligned_dir)
-        self.lookback_days = lookback_days
-        self.lookforward_days = lookforward_days
-        
-        # Create aligned data directory if it doesn't exist
-        self.aligned_dir.mkdir(parents=True, exist_ok=True)
-        
-        if self.debug:
-            print(f"Initialized EventDataExtractor")
-            print(f"Aligned data directory: {self.aligned_dir}")
+    # Initialize components
+    hdm = HistoricalDataManager(debug=debug)
+    validator = DataValidator(debug=debug)
+    preprocessor = DataPreprocessor(cache_dir="cache", debug=debug)
+    analyzer = StatisticalAnalyzer(debug=debug)
     
-    def _get_aligned_path(self, symbol: str, event_number: int) -> Path:
-        """Get the directory path for saving aligned event data."""
-        return self.aligned_dir / symbol / str(event_number)
+    # Load and process data
+    print("\nLoading data...")
+    price_data = hdm.get_price_data(symbol, start_date, end_date)
+    raw_news_data = hdm.get_news_data(symbol, start_date, end_date)
     
-    def extract_event_data(self,
-                          event_date: datetime,
-                          symbol: str,
-                          preprocessor: 'DataPreprocessor') -> Tuple[pd.DataFrame, Dict]:
-        """
-        Extract 2-week period data around an event.
-        
-        Args:
-            event_date: Date of the event
-            symbol: Stock symbol
-            preprocessor: DataPreprocessor instance with aligned data
-            
-        Returns:
-            Tuple of (event_period_data, event_details)
-        """
-        if self.debug:
-            print(f"\nExtracting event data for {symbol} on {event_date}")
-        
-        # Calculate date range
-        start_date = event_date - timedelta(days=self.lookback_days)
-        end_date = event_date + timedelta(days=self.lookforward_days)
-        
-        if self.debug:
-            print(f"Date range: {start_date} to {end_date}")
-        
-        # Get 5-minute data for the period
-        if '5min' not in preprocessor.aligned_data:
-            raise ValueError("5-minute timeframe data not available")
-            
-        df = preprocessor.aligned_data['5min'].copy()
-        
-        # Convert dates if needed
-        if not pd.api.types.is_datetime64_any_dtype(df['Date']):
-            df['Date'] = pd.to_datetime(df['Date'])
-        
-        # Filter to event period
-        mask = (df['Date'] >= start_date) & (df['Date'] <= end_date)
-        period_data = df[mask].copy()
-        
-        if period_data.empty:
-            raise ValueError(f"No data found for period {start_date} to {end_date}")
-        
-        # Create event details
-        event_details = {
-            'symbol': symbol,
-            'event_date': event_date.isoformat(),
-            'start_date': start_date.isoformat(),
-            'end_date': end_date.isoformat(),
-            'data_points': len(period_data),
-            'timeframe': '5min'
-        }
-        
-        return period_data, event_details
+    print("Validating news data...")
+    _, _, valid_news_data = validator.validate_news_data(raw_news_data)
     
-    def save_event_data(self,
-                       period_data: pd.DataFrame,
-                       event_details: Dict,
-                       symbol: str,
-                       event_number: int) -> Path:
-        """Save event period data to aligned data directory."""
-        # Get save location
-        save_dir = self._get_aligned_path(symbol, event_number)
-        save_dir.mkdir(parents=True, exist_ok=True)
+    print("Processing timeframes...")
+    preprocessor.align_all_timeframes(price_data, valid_news_data, symbol)
+    
+    # Find moves
+    print("\nAnalyzing price moves...")
+    daily_moves = analyzer.get_largest_moves(preprocessor, '1d', n_moves=10)
+    hourly_moves = analyzer.get_largest_moves(preprocessor, '1h', n_moves=10)
+    
+    # Combine and sort all moves
+    all_moves = daily_moves + hourly_moves
+    all_moves.sort(key=lambda x: abs(x.percentage_change), reverse=True)
+    
+    print(f"Found {len(all_moves)} significant moves")
+    return all_moves, preprocessor
+
+def save_event_windows(moves, preprocessor, symbol: str, output_dir: str = "data/aligned/6day", debug: bool = True):
+    """Save 6-day windows (3 days before and after) around each significant move."""
+    print(f"\nSaving event windows to {output_dir}")
+    
+    # Initialize extractor with 3-day windows
+    extractor = EventDataExtractor(
+        aligned_dir=output_dir,
+        lookback_days=3,    # 3 days before
+        lookforward_days=3, # 3 days after
+        debug=debug
+    )
+    saved_paths = []
+    
+    for i, move in enumerate(moves, 1):
+        print(f"\nProcessing move {i}/{len(moves)}")
+        print(f"Date: {move.date}")
+        print(f"Change: {move.percentage_change:.2f}%")
         
         try:
-            # Add event number to metadata
-            event_details['event_number'] = event_number
+            save_path = extractor.extract_and_save_event(
+                event_date=move.date,
+                symbol=symbol,
+                preprocessor=preprocessor,
+                event_number=i
+            )
             
-            # Save aligned data
-            data_file = save_dir / 'aligned_5min.parquet'
-            period_data.to_parquet(data_file)
-            
-            # Save metadata
-            meta_file = save_dir / 'metadata.json'
-            with open(meta_file, 'w') as f:
-                json.dump(event_details, f, indent=2, default=str)
-            
-            if self.debug:
-                print(f"\nSaved event data:")
-                print(f"Event number: {event_number}")
-                print(f"Data file: {data_file}")
-                print(f"Metadata: {meta_file}")
-                print(f"Records: {len(period_data)}")
-            
-            return save_dir
-            
+            if save_path and save_path.exists():
+                print(f"✓ Saved event {i}")
+                saved_paths.append(save_path)
+            else:
+                print(f"✗ Failed to save event {i}")
+                
         except Exception as e:
-            if self.debug:
-                print(f"Error saving event data: {str(e)}")
-            raise
+            print(f"Error saving event {i}: {e}")
+            continue
     
-    def extract_and_save_event(self,
-                             event_date: datetime,
-                             symbol: str,
-                             preprocessor: 'DataPreprocessor',
-                             event_number: int) -> Path:
-        """Extract and save event data in one operation."""
-        # Extract data
-        period_data, event_details = self.extract_event_data(
-            event_date,
-            symbol,
-            preprocessor
-        )
+    print(f"\nSuccessfully saved {len(saved_paths)} of {len(moves)} events")
+    return saved_paths
+
+def main():
+    """Main execution function."""
+    # Parameters
+    symbol = 'NVDA'
+    start_date = datetime(2024, 1, 1)
+    end_date = datetime(2024, 1, 31)
+    output_dir = "data/aligned/6day"  # Changed to 6day
+    debug = True
+    
+    try:
+        # First find the moves
+        moves, preprocessor = find_significant_moves(symbol, start_date, end_date, debug)
         
-        # Save data with event number
-        return self.save_event_data(
-            period_data,
-            event_details,
-            symbol,
-            event_number
-        )
+        # Then save the event windows
+        saved_paths = save_event_windows(moves, preprocessor, symbol, output_dir, debug)
+        
+        print("\nProcessing complete!")
+        print(f"Data saved in: {output_dir}/{symbol}/5min/")
+        
+    except Exception as e:
+        print(f"Error in processing: {e}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    main()

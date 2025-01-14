@@ -1,0 +1,9 @@
+{
+  "symbol": "NVDA",
+  "event_date": "2024-01-16T17:00:00",
+  "start_date": "2024-01-09T17:00:00",
+  "end_date": "2024-01-23T17:00:00",
+  "data_points": 4033,
+  "timeframe": "5min",
+  "event_number": 11
+}
