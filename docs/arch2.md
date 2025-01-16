@@ -15,6 +15,12 @@ flowchart TD
         PP --> NA[NewsAnalyzer]
         PP --> CA[CalendarAnalyzer]
         
+        %% New Quantitative Classes
+        PP --> SA[StatisticalAnalyzer]
+        PP --> FA[FundamentalAnalyzer]
+        PP --> TA[TechnicalAnalyzer]
+        PP --> ML[MachineLearning]
+        
         subgraph LLMPipeline["LLM Analysis Pipeline"]
             style LLMPipeline fill:#ff9800,stroke:#fff
             IS[Initial Screening<br>Fast Model]
@@ -23,12 +29,18 @@ flowchart TD
         end
         
         NA --> LLMPipeline
-        CA --> SA[Signal Aggregator]
-        LLMPipeline --> SA
+        CA --> SG[Signal Aggregator]
+        LLMPipeline --> SG
+        
+        %% Connect Quant outputs to Signal Aggregator
+        SA --> SG
+        FA --> SG
+        TA --> SG
+        ML --> SG
     end
 
     subgraph Execution["Execution Layer"]
-        SA --> TM[TradeManager]
+        SG --> TM[TradeManager]
         TM --> MQ[MQL5 Interface]
         TM --> BT[Backtester]
     end
@@ -47,6 +59,6 @@ flowchart TD
     classDef execution fill:#ff9800,stroke:#fff,stroke-width:2px,color:#fff
     
     class NF,EC,PF,DI,PP dataPipeline
-    class NA,CA,IS,DA,SA,TM,BT analysis
-    class MQ,AM,EM,SM,NS execution
+    class NA,CA,IS,DA,SG,TM,BT,SA,FA analysis
+    class MQ,AM,EM,SM,NS,TA,ML execution
 ```
