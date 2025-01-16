@@ -27,3 +27,4 @@ flowchart TD
 
     class init,getPrice,getNews,clearCache function;
     class priceCache,newsCache,fundamentalsCache,basePath,pricePath,newsPath,fundamentalsPath dependency;
+    '''
