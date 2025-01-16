@@ -16,6 +16,7 @@ flowchart TD
         PP --> CA[CalendarAnalyzer]
         
         subgraph LLMPipeline["LLM Analysis Pipeline"]
+            style LLMPipeline fill:#ff9800,stroke:#fff
             IS[Initial Screening<br>Fast Model]
             DA[Detailed Analysis<br>Advanced Model]
             IS --> |High Impact| DA
@@ -46,6 +47,6 @@ flowchart TD
     classDef execution fill:#ff9800,stroke:#fff,stroke-width:2px,color:#fff
     
     class NF,EC,PF,DI,PP dataPipeline
-    class NA,CA,IS,DA,LLMPipeline,SA analysis
-    class TM,MQ,BT,AM,EM,SM,NS execution
+    class NA,CA,IS,DA,SA,TM,BT analysis
+    class MQ,AM,EM,SM,NS execution
 ```
