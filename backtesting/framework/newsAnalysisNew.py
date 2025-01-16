@@ -203,58 +203,83 @@ class NewsAnalysis:
 
     def _parse_detailed_analysis(self, result: str) -> Dict:
         """Parse the detailed analysis response into structured data"""
-        parsed = {
-            "scores": {
-                "sentiment": 0,
-                "relevancy": 0,
-                "reliability": 0,
-                "risk": 0,
-                "impact": 0
-            },
-            "action_plan": None,
-            "position_size": None,
-            "review_period": None,
-            "exit_conditions": None,
-            "raw_analysis": result
-        }
-        
-        if not result:
-            return parsed
-            
         try:
-            # Extract scores
-            score_lines = result.split('\n')
-            for line in score_lines:
-                if 'Sentiment' in line and ':' in line:
-                    parsed['scores']['sentiment'] = int(line.split(':')[1].strip().split('/')[0])
-                elif 'Relevancy' in line and ':' in line:
-                    parsed['scores']['relevancy'] = int(line.split(':')[1].strip().split('/')[0])
-                elif 'Source Reliability' in line and ':' in line:
-                    parsed['scores']['reliability'] = int(line.split(':')[1].strip().split('/')[0])
-                elif 'Risk Level' in line and ':' in line:
-                    parsed['scores']['risk'] = int(line.split(':')[1].strip().split('/')[0])
-                elif 'Market Impact' in line and ':' in line:
-                    parsed['scores']['impact'] = int(line.split(':')[1].strip().split('/')[0])
+            # Initialize default structure
+            parsed = {
+                "scores": {
+                    "sentiment": 0,
+                    "relevancy": 0,
+                    "reliability": 0,
+                    "risk": 0,
+                    "impact": 0
+                },
+                "action_plan": None,
+                "position_size": None,
+                "review_period": None,
+                "exit_conditions": None
+            }
             
-            # Extract action plan if total score >= 40
-            total_score = sum(parsed['scores'].values())
-            if total_score >= 40:
-                action_plan_start = result.find('Trading action plan:')
-                if action_plan_start != -1:
-                    action_plan_text = result[action_plan_start:]
-                    parsed['action_plan'] = action_plan_text
-                    
-                    # Extract specific components
-                    for component in ['Position sizing:', 'Review period:', 'Exit conditions:']:
-                        if component in action_plan_text:
-                            key = component.lower().replace(':', '').replace(' ', '_')
-                            value = action_plan_text.split(component)[1].split('\n')[0].strip()
-                            parsed[key] = value
+            if not result:
+                return parsed
+                
+            # Extract scores using regex for more reliable parsing
+            import re
+            
+            # Score patterns
+            score_patterns = {
+                'sentiment': r'Sentiment:\s*(\d+)',
+                'relevancy': r'Relevancy:\s*(\d+)',
+                'reliability': r'Source Reliability:\s*(\d+)',
+                'risk': r'Risk Level:\s*(\d+)',
+                'impact': r'Market Impact:\s*(\d+)'
+            }
+            
+            # Extract scores
+            for key, pattern in score_patterns.items():
+                if match := re.search(pattern, result):
+                    parsed['scores'][key] = int(match.group(1))
+
+            # Extract trading plan components
+            if 'Trading action plan:' in result:
+                # Get everything after "Trading action plan:"
+                plan_text = result.split('Trading action plan:')[1].split('\n\n')[0]
+                parsed['action_plan'] = plan_text.strip()
+                
+                # Extract position sizing
+                if 'Position sizing' in result:
+                    position_match = re.search(r'Position sizing.*?:(.*?)(?:\n|$)', result)
+                    if position_match:
+                        parsed['position_size'] = position_match.group(1).strip()
+                
+                # Extract review period
+                if 'Review period' in result:
+                    review_match = re.search(r'Review period.*?:(.*?)(?:\n|$)', result)
+                    if review_match:
+                        parsed['review_period'] = review_match.group(1).strip()
+                
+                # Extract exit conditions
+                if 'Exit conditions' in result:
+                    exit_section = result.split('Exit conditions:')[1].split('\n\n')[0]
+                    parsed['exit_conditions'] = [
+                        condition.strip('- ').strip() 
+                        for condition in exit_section.split('\n') 
+                        if condition.strip('- ').strip()
+                    ]
+
+            # Add raw response for reference
+            parsed['raw_analysis'] = result
+            
+            print("\nParsed Analysis:")
+            print(json.dumps(parsed, indent=2))
             
             return parsed
             
-        except Exception:
-            return {"error": "Failed to parse", "raw_analysis": result}
+        except Exception as e:
+            print(f"Parsing error: {str(e)}")
+            return {
+                "error": f"Failed to parse: {str(e)}",
+                "raw_analysis": result
+            }
 
     async def initial_analysis(self, news_item: Dict) -> Tuple[int, str]:
         """First stage analysis for category and impact"""
