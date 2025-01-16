@@ -1,7 +1,10 @@
 # Standard library imports
+from datetime import datetime
+import hashlib
 import os
 import asyncio
 import json
+from pathlib import Path
 from typing import Dict, Tuple, Optional, Literal
 
 # Third-party imports
@@ -19,6 +22,127 @@ class NewsAnalysis:
         self.symbol = symbol
         self.model_choice = model_choice
         self.processed_articles = set()
+
+        self.cache_dir = Path("data/responses") / self.model_choice
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+    def _get_week_cache_path(self, date: datetime) -> Path:
+        """Get cache path for a specific week"""
+        week_number = date.isocalendar()[1]  # Get ISO week number
+        year = date.year
+        week_dir = self.cache_dir / str(year) / f"week_{week_number:02d}"
+        week_dir.mkdir(parents=True, exist_ok=True)
+        return week_dir / "responses.json"
+        
+    def _save_to_cache(self, news_item: Dict, analysis_result: Dict):
+        """Save analysis result to cache"""
+        try:
+            # Create unique key for the article
+            article_date = datetime.fromisoformat(news_item['date'])
+            cache_path = self._get_week_cache_path(article_date)
+            
+            # Load existing cache
+            if cache_path.exists():
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+            else:
+                cache_data = {}
+                
+            # Create unique key from title and date
+            cache_key = f"{news_item['title']}_{news_item['date']}"
+            cache_key = hashlib.md5(cache_key.encode()).hexdigest()
+            
+            # Add metadata to cached result
+            cache_entry = {
+                'timestamp': datetime.now().isoformat(),
+                'news_item': {
+                    'title': news_item['title'],
+                    'date': news_item['date'],
+                    'source': news_item.get('source', 'unknown')
+                },
+                'analysis': analysis_result
+            }
+            
+            # Save to cache
+            cache_data[cache_key] = cache_entry
+            
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, indent=2)
+                
+            if self.debug:
+                print(f"\nSaved analysis to cache: {cache_path}")
+                
+        except Exception as e:
+            print(f"Error saving to cache: {str(e)}")
+            
+    def _load_from_cache(self, news_item: Dict) -> Optional[Dict]:
+        """Try to load analysis result from cache"""
+        try:
+            # Get cache path for article date
+            article_date = datetime.fromisoformat(news_item['date'])
+            cache_path = self._get_week_cache_path(article_date)
+            
+            if not cache_path.exists():
+                return None
+                
+            # Create unique key
+            cache_key = f"{news_item['title']}_{news_item['date']}"
+            cache_key = hashlib.md5(cache_key.encode()).hexdigest()
+            
+            # Load cache
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+                
+            # Return cached analysis if it exists
+            if cache_key in cache_data:
+                if self.debug:
+                    print(f"\nLoaded analysis from cache: {cache_path}")
+                return cache_data[cache_key]['analysis']
+                
+            return None
+            
+        except Exception as e:
+            print(f"Error loading from cache: {str(e)}")
+            return None
+            
+    async def analyze_news(self, news_item: Dict) -> Dict:
+        """Main method to analyze a news item with caching"""
+        
+        # Try to load from cache first
+        cached_result = self._load_from_cache(news_item)
+        if cached_result is not None:
+            return cached_result
+            
+        # Create unique ID for the article
+        article_id = f"{news_item.get('title', '')}-{news_item.get('date', '')}"
+        
+        # Skip if already processed in current session
+        if article_id in self.processed_articles:
+            return {"status": "already_processed"}
+        
+        self.processed_articles.add(article_id)
+        
+        # Perform initial analysis
+        impact_score, initial_result = await self.initial_analysis(news_item)
+        
+        analysis_result = {
+            "initial_analysis": initial_result,
+            "impact_score": impact_score,
+            "detailed_analysis": None,
+            "model_used": self.model_choice
+        }
+        
+        # If high impact, perform detailed analysis
+        if impact_score >= 6:
+            print(f"\nHigh impact ({impact_score}) detected - running detailed analysis...")
+            detailed_result = await self.detailed_analysis(news_item, initial_result)
+            print(f"Detailed analysis result: {detailed_result}")
+            analysis_result["detailed_analysis"] = detailed_result
+            
+            # Save to cache if detailed analysis was performed
+            self._save_to_cache(news_item, analysis_result)
+        
+        return analysis_result
         
     def _setup_environment(self):
         """Initialize API keys and configurations"""
@@ -367,33 +491,4 @@ class NewsAnalysis:
             print(f"Error in detailed analysis: {e}")
             return {"error": str(e)}
 
-    async def analyze_news(self, news_item: Dict) -> Dict:
-        """Main method to analyze a news item"""
-        
-        # Create unique ID for the article
-        article_id = f"{news_item.get('title', '')}-{news_item.get('date', '')}"
-        
-        # Skip if already processed
-        if article_id in self.processed_articles:
-            return {"status": "already_processed"}
-        
-        self.processed_articles.add(article_id)
-        
-        # Perform initial analysis
-        impact_score, initial_result = await self.initial_analysis(news_item)
-        
-        analysis_result = {
-            "initial_analysis": initial_result,
-            "impact_score": impact_score,
-            "detailed_analysis": None,
-            "model_used": self.model_choice
-        }
-        
-        # If high impact, perform detailed analysis
-        if impact_score >= 6:
-            print(f"\nHigh impact ({impact_score}) detected - running detailed analysis...")
-            detailed_result = await self.detailed_analysis(news_item, initial_result)
-            print(f"Detailed analysis result: {detailed_result}")
-            analysis_result["detailed_analysis"] = detailed_result
-        
-        return analysis_result
+    

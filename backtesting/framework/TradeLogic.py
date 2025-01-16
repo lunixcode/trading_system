@@ -56,6 +56,7 @@ class TradeLogic:
             sentiment = scores['sentiment']
             impact = scores['impact']
             reliability = scores['reliability']
+            risk = scores['risk']
 
             # Convert sentiment from 0-10 to -0.8 to 1.0 scale
             scaled_sentiment = (sentiment - 5) * 0.2
@@ -63,21 +64,27 @@ class TradeLogic:
             # Use reliability as confidence (0-10 scale)
             confidence = reliability / 10.0
             
+            # Invert risk score (0 risk becomes 1, 10 risk becomes 0)
+            # This makes low risk increase our score
+            inverted_risk = (10 - risk) / 10.0
+            
             # Combined score for decision making
-            score = scaled_sentiment * confidence * (impact / 10.0)
+            # Now includes inverted risk in the multiplication
+            score = scaled_sentiment * confidence * (impact / 10.0) * inverted_risk
             
             print(f"\nTrading Analysis:")
             print(f"Raw Sentiment: {sentiment}/10")
             print(f"Scaled Sentiment: {scaled_sentiment}")
             print(f"Confidence: {confidence}")
             print(f"Impact: {impact}/10")
+            print(f"Risk (inverted): {inverted_risk}")
             print(f"Combined Score: {score}")
             
             # Determine position size based on confidence and current exposure
             potential_position_size = self._calculate_position_size(score, current_price)
             
             # Strong signal threshold (may need tuning)
-            if abs(score) > 0.7:
+            if abs(score) > 0.3:  # Lowered threshold since we're multiplying by risk now
                 if score > 0 and self._can_open_long(current_price, potential_position_size):
                     return self._open_long_position(current_price, potential_position_size, news_analysis, timestamp)
                 elif score < 0 and self._can_open_short(current_price, potential_position_size):

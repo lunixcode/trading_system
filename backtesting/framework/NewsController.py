@@ -27,13 +27,16 @@ class NewsController:
         self.preprocessor = DataPreprocessor(cache_dir="cache", debug=True)
         
     async def analyze_event_window(self, 
-                             event_data: pd.DataFrame,
-                             metadata: Dict,
-                             news_data: List[dict]) -> Dict[datetime, Dict]:
+                          event_data: pd.DataFrame,
+                          metadata: Dict,
+                          news_data: List[dict]) -> Dict[datetime, Dict]:
         """Analyze all news in an event window"""
-        print(f"\nAnalyzing event window:")
+        print(f"\n{'='*50}")
+        print(f"ANALYZING EVENT WINDOW")
+        print(f"{'='*50}")
         print(f"Event date: {metadata['event_date']}")
-        print(f"Using LLM Model: {self.model_choice}")
+        print(f"Number of bars: {len(event_data)}")
+        print(f"Number of news items: {len(news_data)}")
         
         trade_signals = {}
         
@@ -41,41 +44,40 @@ class NewsController:
         for idx, row in event_data.iterrows():
             if row['news_count'] > 0 and pd.notna(row['news_indices']):
                 indices = [int(i) for i in str(row['news_indices']).split(',')]
-                print(f"\nFound {len(indices)} news items at {idx}")
+                print(f"\n{'*'*50}")
+                print(f"Found {len(indices)} news items at {idx}")
+                print(f"Current price: {row['Close']}")
                 
                 for news_idx in indices:
                     if news_idx < len(news_data):
                         news_item = news_data[news_idx]
-                        print("\n" + "="*80)
-                        print(f"NEWS ARTICLE {news_idx}")
-                        print("="*80)
-                        print(f"Date: {news_item.get('date', 'Unknown')}")
-                        print(f"Source: {news_item.get('source', 'Unknown')}")
+                        print("\nANALYZING NEWS ITEM")
                         print(f"Title: {news_item.get('title', 'No Title')}")
-                        print("\nContent:")
-                        print("-"*80)
-                        print(news_item.get('content', 'No content'))
-                        print("-"*80)
                         
                         # Analyze with LLM
                         analysis = await self.news_analyzer.analyze_news(news_item)
-                        print("\nLLM ANALYSIS")
-                        print("-"*80)
-                        print(f"Initial Analysis:\n{analysis.get('initial_analysis', 'No initial analysis')}")
-                        print(f"\nImpact Score: {analysis.get('impact_score', 0)}")
-                        
-                        if analysis.get('detailed_analysis'):
-                            print("\nDetailed Analysis:")
-                            detailed = analysis['detailed_analysis']
-                            print(f"Scores: {json.dumps(detailed.get('scores', {}), indent=2)}")
-                            if detailed.get('action_plan'):
-                                print(f"\nAction Plan:\n{detailed['action_plan']}")
+                        print(f"\nLLM ANALYSIS RESULTS:")
+                        print(f"Impact Score: {analysis.get('impact_score', 0)}")
                         
                         if analysis.get('impact_score', 0) >= 6:
+                            print("\n🚨 HIGH IMPACT DETECTED - GENERATING TRADE SIGNAL 🚨")
+                            print(f"Detailed Analysis Available: {bool(analysis.get('detailed_analysis'))}")
+                            if analysis.get('detailed_analysis'):
+                                scores = analysis['detailed_analysis'].get('scores', {})
+                                print("\nTrade Signal Details:")
+                                print(f"Sentiment Score: {scores.get('sentiment', 0)}/10")
+                                print(f"Reliability Score: {scores.get('reliability', 0)}/10")
+                                print(f"Risk Score: {scores.get('risk', 0)}/10")
+                            
                             trade_signals[pd.to_datetime(idx)] = analysis
-                            print("\n*** HIGH IMPACT NEWS - GENERATING TRADE SIGNAL ***")
-                        
-        print(f"\nTotal trade signals generated: {len(trade_signals)}")
+                        else:
+                            print("\nLow impact - no trade signal generated")
+        
+        print(f"\n{'='*50}")
+        print(f"EVENT WINDOW ANALYSIS COMPLETE")
+        print(f"Total trade signals generated: {len(trade_signals)}")
+        print(f"{'='*50}")
+        
         return trade_signals
 
     async def run_event_backtest(self, event_id: int) -> Optional[Dict]:
