@@ -1,8 +1,12 @@
 import pandas as pd
 import backtrader as bt
 from pathlib import Path
-from typing import Dict, Optional
+import json
+from typing import Dict, List, Optional, Tuple
 from datetime import datetime
+from DataPreprocessor import DataPreprocessor
+from HistoricalDataManager import HistoricalDataManager
+from DataValidator import DataValidator
 
 class PandasNewsData(bt.feeds.PandasData):
     """Custom data feed for price data with news information"""
@@ -26,6 +30,11 @@ class Backtester:
         self.window_type = window_type
         self.initial_cash = initial_cash
         self.cerebro = bt.Cerebro()
+        
+        # Initialize data components
+        self.preprocessor = DataPreprocessor(cache_dir="cache", debug=True)
+        self.hdm = HistoricalDataManager(debug=True)
+        self.validator = DataValidator(debug=True)
         
     def prepare_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Prepare DataFrame for Backtrader"""
@@ -55,25 +64,32 @@ class Backtester:
         
         return df.fillna(method='ffill').fillna(method='bfill')
         
-    def load_event_window(self, event_id: int, symbol: str) -> tuple[Optional[pd.DataFrame], Optional[Dict]]:
+    def load_event_window(self, event_id: int, symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[Dict]]:
         """Load a single event window data and metadata"""
         try:
             data_path = self.data_dir / "aligned" / self.window_type / symbol / "5min"
             parquet_file = data_path / f"{event_id}.parquet"
-            meta_file = data_path / f"{event_id}_meta.json"
+            meta_file = data_path / "metadata" / f"{event_id}.json"
+            
+            print(f"\nLooking for data files:")
+            print(f"Parquet: {parquet_file}")
+            print(f"Metadata: {meta_file}")
             
             if not parquet_file.exists() or not meta_file.exists():
+                print("Files not found")
                 return None, None
-                
+                    
             # Load parquet data
             df = pd.read_parquet(parquet_file)
+            print(f"Successfully loaded parquet data")
             
             # Load metadata
             with open(meta_file, 'r') as f:
                 metadata = json.load(f)
-                
+            print(f"Successfully loaded metadata")
+                    
             return df, metadata
-            
+                
         except Exception as e:
             print(f"Error loading event {event_id}: {str(e)}")
             return None, None

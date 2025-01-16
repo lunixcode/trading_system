@@ -1,9 +1,15 @@
 import asyncio
+import json
 from typing import Dict, List, Optional
 from datetime import datetime
 import pandas as pd
+from backtester import Backtester
+from NewsStrategy import NewsStrategy  # Changed to match your file naming
+from DataPreprocessor import DataPreprocessor
+from DataValidator import DataValidator
+from HistoricalDataManager import HistoricalDataManager
 from newsAnalysisNew import NewsAnalysis
-from backtester import Backtester, NewsStrategy
+
 
 class NewsController:
     def __init__(self, 
@@ -13,34 +19,65 @@ class NewsController:
         self.symbol = symbol
         self.model_choice = model_choice
         self.window_type = window_type
+        # Initialize all components once
         self.news_analyzer = NewsAnalysis(symbol=symbol, model_choice=model_choice)
         self.backtester = Backtester(data_dir="data", window_type=window_type)
+        self.hdm = HistoricalDataManager(debug=True)
+        self.validator = DataValidator(debug=True)
+        self.preprocessor = DataPreprocessor(cache_dir="cache", debug=True)
         
     async def analyze_event_window(self, 
-                                 event_data: pd.DataFrame,
-                                 metadata: Dict) -> Dict[datetime, Dict]:
+                             event_data: pd.DataFrame,
+                             metadata: Dict,
+                             news_data: List[dict]) -> Dict[datetime, Dict]:
         """Analyze all news in an event window"""
+        print(f"\nAnalyzing event window:")
+        print(f"Event date: {metadata['event_date']}")
+        print(f"Using LLM Model: {self.model_choice}")
+        
         trade_signals = {}
         
         # Process each bar with news
         for idx, row in event_data.iterrows():
             if row['news_count'] > 0 and pd.notna(row['news_indices']):
                 indices = [int(i) for i in str(row['news_indices']).split(',')]
+                print(f"\nFound {len(indices)} news items at {idx}")
                 
                 for news_idx in indices:
-                    if news_idx < len(metadata['news_data']):
-                        # Get news item
-                        news_item = metadata['news_data'][news_idx]
+                    if news_idx < len(news_data):
+                        news_item = news_data[news_idx]
+                        print("\n" + "="*80)
+                        print(f"NEWS ARTICLE {news_idx}")
+                        print("="*80)
+                        print(f"Date: {news_item.get('date', 'Unknown')}")
+                        print(f"Source: {news_item.get('source', 'Unknown')}")
+                        print(f"Title: {news_item.get('title', 'No Title')}")
+                        print("\nContent:")
+                        print("-"*80)
+                        print(news_item.get('content', 'No content'))
+                        print("-"*80)
                         
-                        # Analyze news
+                        # Analyze with LLM
                         analysis = await self.news_analyzer.analyze_news(news_item)
+                        print("\nLLM ANALYSIS")
+                        print("-"*80)
+                        print(f"Initial Analysis:\n{analysis.get('initial_analysis', 'No initial analysis')}")
+                        print(f"\nImpact Score: {analysis.get('impact_score', 0)}")
                         
-                        # Store analysis result with timestamp
+                        if analysis.get('detailed_analysis'):
+                            print("\nDetailed Analysis:")
+                            detailed = analysis['detailed_analysis']
+                            print(f"Scores: {json.dumps(detailed.get('scores', {}), indent=2)}")
+                            if detailed.get('action_plan'):
+                                print(f"\nAction Plan:\n{detailed['action_plan']}")
+                        
                         if analysis.get('impact_score', 0) >= 6:
                             trade_signals[pd.to_datetime(idx)] = analysis
-                            
+                            print("\n*** HIGH IMPACT NEWS - GENERATING TRADE SIGNAL ***")
+                        
+        print(f"\nTotal trade signals generated: {len(trade_signals)}")
         return trade_signals
-        
+
     async def run_event_backtest(self, event_id: int) -> Optional[Dict]:
         """Run complete analysis and backtest for a single event"""
         # Load event data
@@ -51,20 +88,37 @@ class NewsController:
         print(f"\nAnalyzing event {event_id}")
         print(f"Date range: {data.index[0]} to {data.index[-1]}")
         
-        # Analyze news and generate signals
-        trade_signals = await self.analyze_event_window(data, metadata)
+        # Get raw data for the window period once
+        start_date = pd.to_datetime(metadata['start_date'])
+        end_date = pd.to_datetime(metadata['end_date'])
+        
+        # Load and process data once
+        price_data = self.hdm.get_price_data(self.symbol, start_date, end_date)
+        raw_news = self.hdm.get_news_data(self.symbol, start_date, end_date)
+        _, _, valid_news = self.validator.validate_news_data(raw_news)
+        
+        # Align data once
+        _, news_data = self.preprocessor.align_all_timeframes(
+            price_data, 
+            valid_news, 
+            self.symbol
+        )
+        
+        # Generate signals using the loaded news data
+        trade_signals = await self.analyze_event_window(data, metadata, news_data)
         
         if trade_signals:
             print(f"Generated {len(trade_signals)} trade signals")
             
-            # Run backtest with signals
+            # Run backtest with signals and data
             results = self.backtester.run_event_backtest(
                 event_data=data,
                 strategy_class=NewsStrategy,
                 strategy_params={
                     'trade_signals': trade_signals,
                     'symbol': self.symbol,
-                    'metadata': metadata
+                    'metadata': metadata,
+                    'news_data': news_data  # Pass the news data to strategy
                 }
             )
             
@@ -72,7 +126,6 @@ class NewsController:
         else:
             print("No trade signals generated")
             return None
-            
     async def run_sequential_backtest(self,
                                     start_event: int = 1,
                                     end_event: Optional[int] = None) -> Dict:
@@ -95,21 +148,76 @@ class NewsController:
             
         return self.backtester._aggregate_results(all_results)
 
+    def _print_event_summary(self, event_id: int, results: Dict):
+        """Print summary of event backtest results"""
+        print(f"\nEvent {event_id} Summary:")
+        print(f"Trades Executed: {results['strategy_metrics']['total_trades']}")
+        print(f"Event PnL: ${results['strategy_metrics']['total_pnl']:.2f}")
+        print(f"Return: {results['return_pct']:.2%}")
+        
+        if results['strategy_metrics']['total_trades'] > 0:
+            win_rate = (results['strategy_metrics']['winning_trades'] / 
+                       results['strategy_metrics']['total_trades'])
+            print(f"Win Rate: {win_rate:.2%}")
+            print(f"Max Drawdown: {results['strategy_metrics']['max_drawdown']:.2%}")
+    
+    def _print_final_summary(self, results: Dict):
+        """Print summary of all backtest results"""
+        if not results:
+            print("\nNo results generated from backtest")
+            return
+            
+        print("\n" + "="*50)
+        print("Final Backtest Results")
+        print("="*50)
+        
+        total_events = len(results.get('event_results', []))
+        print(f"Total Events Analyzed: {total_events}")
+        
+        if total_events > 0:
+            print(f"Total Trades: {results.get('total_trades', 0)}")
+            print(f"Total PnL: ${results.get('total_pnl', 0):.2f}")
+            print(f"Average Return per Event: {results.get('avg_return_per_event', 0):.2%}")
+            
+            profitable_events = sum(1 for r in results.get('event_results', []) 
+                                if r.get('strategy_metrics', {}).get('total_pnl', 0) > 0)
+            print(f"Profitable Events: {profitable_events}/{total_events} "
+                f"({profitable_events/total_events:.2%})")
+        
+            print("\nEvent Breakdown:")
+            for event in results.get('event_results', []):
+                print(f"\nEvent {event.get('event_id', 'Unknown')}:")
+                print(f"Date: {event.get('event_date', 'Unknown')}")
+                print(f"PnL: ${event.get('strategy_metrics', {}).get('total_pnl', 0):.2f}")
+                print(f"Trades: {event.get('strategy_metrics', {}).get('total_trades', 0)}")
+
 async def main():
-    # Example usage
-    controller = NewsController(
-        symbol="NVDA",
-        model_choice="claude",
-        window_type="2week"  # or "6day"
-    )
-    
-    results = await controller.run_sequential_backtest(
-        start_event=1,
-        end_event=10  # Optional: limit number of events
-    )
-    
-    print("\nBacktest Results:")
-    print(f"Total Events: {results['total_events']}")
-    print(f"Total Trades: {results['total_trades']}")
-   
-   #NOT FINISHED, CLAUDES TIMED OUT URGH
+    """Example usage"""
+    try:
+        print("\n" + "="*50)
+        print("News-Based Trading Backtest")
+        print("="*50)
+
+        # Initialize controller
+        controller = NewsController(
+            symbol="NVDA",
+            model_choice="claude",
+            window_type="2week"  # or "6day"
+        )
+        
+        # Run backtest
+        results = await controller.run_sequential_backtest(
+            start_event=1,
+            end_event=10  # Optional: limit number of events
+        )
+        
+        # Print final results
+        controller._print_final_summary(results)
+        
+    except Exception as e:
+        print(f"Error in backtest execution: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    asyncio.run(main())

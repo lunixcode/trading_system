@@ -53,9 +53,14 @@ class NewsAnalysis:
     async def _call_ai_model(self, prompt: str, detailed: bool = False) -> str:
         """Make API call to selected AI model"""
         try:
+            print(f"\n{'='*50}")
+            print(f"LLM API Call:")
+            print(f"Model Choice: {self.model_choice}")
+            print(f"Detailed Mode: {detailed}")
+
             if self.model_choice == "gpt":
-                # GPT-4 has 200 requests/min, GPT-3.5 has 3500 requests/min
                 model = "gpt-4-turbo-preview" if detailed else "gpt-3.5-turbo"
+                print(f"Using GPT Model: {model}")
                 data = {
                     "model": model,
                     "messages": [{"role": "user", "content": prompt}],
@@ -78,12 +83,47 @@ class NewsAnalysis:
                         json=data
                     )
                 
-                await asyncio.sleep(0.5 if model == "gpt-4-turbo-preview" else 0.2)  # Delay based on model
+                await asyncio.sleep(0.5 if model == "gpt-4-turbo-preview" else 0.2)
                 response.raise_for_status()
                 return response.json()['choices'][0]['message']['content']
-                
+                    
+            elif self.model_choice == "claude":
+                model = "claude-3-opus-20240229" if detailed else "claude-3-sonnet-20240229"
+                print(f"Using Claude Model: {model}")
+                try:
+                    print("Sending request to Claude API...")
+                    response = self.claude_client.messages.create(
+                        model=model,
+                        max_tokens=4096 if detailed else 500,
+                        temperature=0.5,
+                        messages=[{
+                            "role": "user",
+                            "content": prompt
+                        }]
+                    )
+                    await asyncio.sleep(0.7)
+                    print("Response received from Claude")
+                    return response.content[0].text
+                except Exception as e:
+                    if "429" in str(e):
+                        print("\nClaude: Hit rate limit, waiting 20 seconds...")
+                        await asyncio.sleep(20)
+                        response = self.claude_client.messages.create(
+                            model=model,
+                            max_tokens=4096 if detailed else 500,
+                            temperature=0.5,
+                            messages=[{
+                                "role": "user",
+                                "content": prompt
+                            }]
+                        )
+                        await asyncio.sleep(0.7)
+                        return response.content[0].text
+                    raise e
+                    
             elif self.model_choice == "gemini":
-                # Gemini free tier: 60 requests/min
+                model = "gemini-1.5-pro"  # Currently same model for both
+                print(f"Using Gemini Model: {model}")
                 try:
                     response = await self.gemini_model.generate_content_async(prompt)
                     await asyncio.sleep(1)  # 1 second delay for free tier
@@ -96,45 +136,16 @@ class NewsAnalysis:
                         await asyncio.sleep(1)
                         return response.text
                     raise e
-                
-            elif self.model_choice == "claude":
-                # Claude-3: 100 requests/min (verify this for your tier)
-                try:
-                    response = self.claude_client.messages.create(
-                        model="claude-3-opus-20240229",
-                        max_tokens=4096 if detailed else 500,
-                        temperature=0.5,
-                        messages=[{
-                            "role": "user",
-                            "content": prompt
-                        }]
-                    )
-                    await asyncio.sleep(0.7)  # 0.7 second delay to stay under 100 rpm
-                    return response.content[0].text
-                except Exception as e:
-                    if "429" in str(e):
-                        print("\nClaude: Hit rate limit, waiting 20 seconds...")
-                        await asyncio.sleep(20)
-                        response = self.claude_client.messages.create(
-                            model="claude-3-opus-20240229",
-                            max_tokens=4096 if detailed else 500,
-                            temperature=0.5,
-                            messages=[{
-                                "role": "user",
-                                "content": prompt
-                            }]
-                        )
-                        await asyncio.sleep(0.7)
-                        return response.content[0].text
-                    raise e
-                
+                    
             elif self.model_choice == "together":
-                # Together AI: Variable based on model, using conservative delay
+                model = ("mistralai/Mixtral-8x7B-Instruct-v0.1" if detailed 
+                        else "mistralai/Mistral-7B-Instruct-v0.2")
+                print(f"Using Together Model: {model}")
                 formatted_prompt = f"""<s>[INST] {prompt} [/INST]</s>"""
                 try:
                     response = together.Complete.create(
                         prompt=formatted_prompt,
-                        model="mistralai/Mistral-7B-Instruct-v0.2",
+                        model=model,
                         max_tokens=4096 if detailed else 500,
                         temperature=0.5,
                         top_p=0.7,
@@ -142,7 +153,7 @@ class NewsAnalysis:
                         repetition_penalty=1.1
                     )
                     
-                    await asyncio.sleep(0.5)  # 0.5 second default delay
+                    await asyncio.sleep(0.5)
                     
                     if not response or 'choices' not in response:
                         print("No valid response or choices from Together API")
@@ -160,7 +171,7 @@ class NewsAnalysis:
                         await asyncio.sleep(20)
                         response = together.Complete.create(
                             prompt=formatted_prompt,
-                            model="mistralai/Mistral-7B-Instruct-v0.2",
+                            model=model,
                             max_tokens=4096 if detailed else 500,
                             temperature=0.5,
                             top_p=0.7,
@@ -171,7 +182,11 @@ class NewsAnalysis:
                         if response['choices'] and 'text' in response['choices'][0]:
                             return response['choices'][0]['text']
                     return None
-                
+                    
+            print(f"Request sent successfully")
+            print(f"Prompt preview: {prompt[:200]}...")
+            print('='*50)
+            
         except Exception as e:
             print(f"API call failed: {e}")
             return None
@@ -308,7 +323,18 @@ class NewsAnalysis:
         New Content:
         {news_item.get('content', '')}
         """
-        
+        try:
+            print("Sending request to LLM...")
+            result = await self._call_ai_model(prompt, detailed=True)
+            print(f"Raw LLM Response:\n{result}")
+            
+            parsed_result = self._parse_detailed_analysis(result)
+            print(f"Parsed Result:\n{json.dumps(parsed_result, indent=2)}")
+            
+            return parsed_result
+        except Exception as e:
+            print(f"Error in detailed analysis: {e}")
+            return {"error": str(e)}
         try:
             result = await self._call_ai_model(prompt, detailed=True)
             return self._parse_detailed_analysis(result)
@@ -340,7 +366,9 @@ class NewsAnalysis:
         
         # If high impact, perform detailed analysis
         if impact_score >= 6:
+            print(f"\nHigh impact ({impact_score}) detected - running detailed analysis...")
             detailed_result = await self.detailed_analysis(news_item, initial_result)
+            print(f"Detailed analysis result: {detailed_result}")
             analysis_result["detailed_analysis"] = detailed_result
         
         return analysis_result
